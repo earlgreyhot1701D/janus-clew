@@ -7,6 +7,9 @@ import os
 # Add current directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# Set port BEFORE importing backend
+os.environ["API_PORT"] = "3001"
+
 from backend.server import run_server
 
 if __name__ == "__main__":
