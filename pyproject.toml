@@ -1,0 +1,48 @@
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 88
+skip = [".gitignore", ".venv", "node_modules"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-v --tb=short --cov=cli --cov=backend --cov-report=term-missing"
+
+[build-system]
+requires = ["setuptools>=65.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "janus-clew"
+version = "0.2.0"
+description = "Evidence-backed coding growth tracking with Amazon Q"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "You", email = "you@example.com"}
+]
+
+dependencies = [
+    "click>=8.1.7",
+    "gitpython>=3.1.40",
+    "fastapi>=0.104.1",
+    "uvicorn>=0.24.0",
+    "pydantic>=2.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+    "black>=23.12.0",
+    "isort>=5.13.2",
+]
+
+[project.scripts]
+janus-clew = "cli.main:main"

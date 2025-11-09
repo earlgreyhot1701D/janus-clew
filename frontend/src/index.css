@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-200;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+  }
+
+  .btn-primary {
+    @apply btn bg-teal-500 text-white hover:bg-teal-600 dark:hover:bg-teal-400;
+  }
+
+  .btn-secondary {
+    @apply btn bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-50 hover:bg-slate-200 dark:hover:bg-slate-700;
+  }
+
+  .badge {
+    @apply inline-block px-3 py-1 rounded-full text-xs font-medium bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300;
+  }
+
+  .metric {
+    @apply flex flex-col gap-2;
+  }
+
+  .metric-label {
+    @apply text-sm font-medium text-slate-600 dark:text-slate-400;
+  }
+
+  .metric-value {
+    @apply text-2xl font-bold text-slate-900 dark:text-slate-50;
+  }
+
+  .chart-container {
+    @apply w-full h-80 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4;
+  }
+}
