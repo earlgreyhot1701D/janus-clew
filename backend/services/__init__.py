@@ -3,6 +3,10 @@
 from typing import Dict, List, Any, Optional
 
 from cli.storage import StorageManager
+from backend.services.pattern_detector import PatternDetector
+from backend.services.preference_analyzer import PreferenceAnalyzer
+from backend.services.trajectory_analyzer import TrajectoryAnalyzer
+from backend.services.recommendation_engine import RecommendationEngine
 from exceptions import NotFoundError
 from logger import get_logger
 
@@ -42,10 +46,10 @@ class AnalysisService:
         """
         logger.debug("Fetching latest analysis")
         analysis = self.storage.load_latest_analysis()
-        
+
         if not analysis:
             raise NotFoundError("No analyses found")
-        
+
         return analysis
 
     def get_analysis_count(self) -> int:
@@ -74,7 +78,7 @@ class TimelineService:
             List of timeline points sorted by date
         """
         logger.debug("Building timeline")
-        
+
         analyses = self.analysis_service.get_all_analyses()
         timeline = []
 
@@ -107,7 +111,7 @@ class SkillsService:
             List of skill dictionaries with project information
         """
         logger.debug("Extracting skills")
-        
+
         analysis = self.analysis_service.get_latest_analysis()
         skills = {}
 
@@ -141,7 +145,7 @@ class GrowthService:
             Dictionary with growth metrics
         """
         logger.debug("Calculating growth metrics")
-        
+
         analysis = self.analysis_service.get_latest_analysis()
         overall = analysis.get("overall", {})
 
@@ -176,7 +180,7 @@ class ComplexityService:
             NotFoundError: If project not found
         """
         logger.debug(f"Getting complexity breakdown for {project_name}")
-        
+
         try:
             analysis = self.analysis_service.get_latest_analysis()
         except NotFoundError:
@@ -200,3 +204,88 @@ class ComplexityService:
                 return breakdown
 
         raise NotFoundError(f"Project {project_name} not found")
+
+
+class DevelopmentSignatureService:
+    """Service for Development Signature generation (Phase 2).
+
+    Generates complete development profile with patterns, preferences,
+    trajectory, and forward-looking recommendations.
+    """
+
+    def __init__(self, storage: Optional[StorageManager] = None):
+        """Initialize Development Signature service.
+
+        Args:
+            storage: StorageManager instance (or create new one)
+        """
+        self.storage = storage or StorageManager()
+        self.analysis_service = AnalysisService(storage)
+        self.pattern_detector = PatternDetector()
+        self.preference_analyzer = PreferenceAnalyzer()
+        self.trajectory_analyzer = TrajectoryAnalyzer()
+        self.recommendation_engine = RecommendationEngine()
+
+    def generate_development_signature(self) -> Dict[str, Any]:
+        """Generate complete Development Signature.
+
+        Orchestrates pattern detection, preference analysis, trajectory
+        analysis, and recommendation generation into one comprehensive signature.
+
+        Returns:
+            Dictionary with patterns, preferences, trajectory, recommendations
+
+        Raises:
+            NotFoundError: If no analyses available
+        """
+        logger.debug("Generating Development Signature")
+
+        try:
+            analyses = self.analysis_service.get_all_analyses()
+            if not analyses:
+                raise NotFoundError("No analyses found for signature generation")
+
+            # Step 1: Detect patterns across all projects
+            logger.debug("Step 1: Detecting patterns")
+            patterns = self.pattern_detector.detect_patterns(analyses)
+
+            # Step 2: Analyze architectural preferences
+            logger.debug("Step 2: Analyzing preferences")
+            preferences = self.preference_analyzer.analyze_preferences(analyses)
+
+            # Step 3: Analyze learning trajectory
+            logger.debug("Step 3: Analyzing trajectory")
+            trajectory = self.trajectory_analyzer.analyze_trajectory(analyses)
+
+            # Step 4: Generate forward-looking recommendations
+            logger.debug("Step 4: Generating recommendations")
+            recommendations = self.recommendation_engine.generate_recommendations(
+                patterns, preferences, trajectory
+            )
+
+            signature = {
+                "patterns": patterns,
+                "preferences": preferences,
+                "trajectory": trajectory,
+                "recommendations": recommendations,
+                "generated_at": self._get_timestamp(),
+            }
+
+            logger.info("Development Signature generated successfully")
+            return signature
+
+        except NotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to generate Development Signature: {e}", exc_info=True)
+            raise
+
+    def _get_timestamp(self) -> str:
+        """Get current timestamp.
+
+        Returns:
+            ISO format timestamp
+        """
+        from datetime import datetime
+        return datetime.now().isoformat()
+

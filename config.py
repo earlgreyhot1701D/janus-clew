@@ -50,7 +50,7 @@ AMAZON_Q_RETRY_BACKOFF = float(os.getenv("AMAZON_Q_BACKOFF", "2.0"))
 # ============================================================================
 
 API_HOST = os.getenv("API_HOST", "127.0.0.1")
-API_PORT = int(os.getenv("API_PORT", "3000"))
+API_PORT = int(os.getenv("API_PORT", "3001"))
 API_RELOAD = ENVIRONMENT == "development"
 
 FRONTEND_HOST = os.getenv("FRONTEND_HOST", "127.0.0.1")
@@ -89,7 +89,7 @@ CLI_USE_MOCK_DATA = os.getenv("JANUS_USE_MOCK", "false").lower() == "true"
 # API CONFIGURATION
 # ============================================================================
 
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000")
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3001")
 CORS_ORIGINS_LIST = [origin.strip() for origin in CORS_ORIGINS.split(",")]
 
 # ============================================================================

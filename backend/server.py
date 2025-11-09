@@ -39,6 +39,7 @@ from backend.services import (
     SkillsService,
     GrowthService,
     ComplexityService,
+    DevelopmentSignatureService,
 )
 from exceptions import JanusException, NotFoundError
 from logger import get_logger
@@ -141,6 +142,11 @@ def get_growth_service() -> GrowthService:
 def get_complexity_service() -> ComplexityService:
     """Get complexity service instance."""
     return ComplexityService()
+
+
+def get_development_signature_service() -> DevelopmentSignatureService:
+    """Get development signature service instance."""
+    return DevelopmentSignatureService()
 
 
 # ============================================================================
@@ -319,6 +325,36 @@ async def get_complexity_breakdown(project_name: str):
     except Exception as e:
         logger.error(f"Error getting complexity: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to fetch complexity")
+
+
+# ============================================================================
+# DEVELOPMENT SIGNATURE ENDPOINTS (PHASE 2)
+# ============================================================================
+
+@app.get("/api/development-signature")
+async def get_development_signature():
+    """Get Development Signature - complete analysis with patterns, preferences, trajectory, and recommendations.
+
+    Returns:
+        Development signature with patterns, preferences, trajectory, and recommendations
+
+    Raises:
+        HTTPException: 404 if no analyses found
+    """
+    logger.debug("GET /api/development-signature")
+    service = get_development_signature_service()
+
+    try:
+        signature = service.generate_development_signature()
+        return {
+            "status": "success",
+            "signature": signature
+        }
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail="No analyses found for signature")
+    except Exception as e:
+        logger.error(f"Error generating development signature: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to generate development signature")
 
 
 # ============================================================================
