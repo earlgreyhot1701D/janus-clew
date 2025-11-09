@@ -1,5 +1,8 @@
 """Janus Clew Configuration - Centralized settings and constants."""
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 from pathlib import Path
 from typing import Literal

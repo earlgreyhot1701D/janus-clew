@@ -3,7 +3,7 @@ import type { AxiosInstance } from 'axios';
 
 const getApiBaseUrl = (): string => {
   const envUrl = import.meta.env.VITE_API_URL;
-  const defaultUrl = 'http://localhost:3000/api';
+  const defaultUrl = 'http://localhost:3001/api';
 
   if (!envUrl || typeof envUrl !== 'string' || envUrl.trim() === '') {
     return defaultUrl;
