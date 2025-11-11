@@ -110,8 +110,8 @@ def sanitize_for_prompt(text: str, max_length: int = 1000) -> str:
     text = text.replace('"""', "'''")
     text = text.replace("'''", "```")
 
-    # Limit length
+    # Limit length (including the "..." suffix)
     if len(text) > max_length:
-        text = text[:max_length] + "..."
+        text = text[:max_length - 3] + "..."
 
     return text

@@ -37,7 +37,8 @@ class TestLogger:
         record = Mock()
         record.levelname = "INFO"
         record.getMessage = Mock(return_value="Test message")
-        
+        record.exc_text = None  # Fix: Set exc_text to None, not Mock (prevents concatenation error)
+
         formatted = formatter.format(record)
         assert "\033[" in formatted  # Contains ANSI color code
 
@@ -64,10 +65,14 @@ class TestValidators:
 
     def test_validate_repo_accepts_git_repo(self, tmp_path):
         """Test that validate_repo accepts valid git repos."""
+        from git import Repo as GitRepo
+
         git_dir = tmp_path / "git_repo"
         git_dir.mkdir()
-        (git_dir / ".git").mkdir()
-        
+
+        # Fix: Actually initialize a git repo instead of just creating .git dir
+        GitRepo.init(str(git_dir))
+
         # Should not raise
         result = validate_repo(str(git_dir))
         assert result is True
@@ -343,14 +348,18 @@ class TestGuardrailsIntegration:
 
     def test_guardrails_work_with_real_data(self, tmp_path):
         """Test guardrails with real data."""
+        from git import Repo as GitRepo
+
         # Create a test git repo
         repo_dir = tmp_path / "test_repo"
         repo_dir.mkdir()
-        (repo_dir / ".git").mkdir()
-        
+
+        # Fix: Actually initialize a git repo
+        GitRepo.init(str(repo_dir))
+
         py_file = repo_dir / "test.py"
         py_file.write_text("print('hello')")
-        
+
         # Test validators
         assert validate_repo(str(repo_dir)) is True
         assert should_analyze_file(py_file) is True
