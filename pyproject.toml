@@ -12,6 +12,10 @@ skip = [".gitignore", ".venv", "node_modules"]
 testpaths = ["tests"]
 python_files = "test_*.py"
 addopts = "-v --tb=short --cov=cli --cov=backend --cov-report=term-missing"
+asyncio_mode = "auto"
+markers = [
+    "asyncio: marks tests as async (deselect with '-m \"not asyncio\"')",
+]
 
 [build-system]
 requires = ["setuptools>=65.0"]
