@@ -1,12 +1,13 @@
 """Pydantic models for data validation and API responses."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+from pathlib import Path
 
 
 # ============================================================================
-# INPUT MODELS
+# INPUT MODELS (with Guardrails Validators)
 # ============================================================================
 
 
@@ -15,6 +16,20 @@ class AnalyzeRequest(BaseModel):
 
     repos: List[str] = Field(..., min_items=1, description="List of repository paths")
     force: bool = Field(False, description="Force re-analysis")
+
+    # ✅ GUARDRAIL: Validate repo paths exist and are valid
+    @field_validator('repos')
+    @classmethod
+    def validate_repos(cls, v):
+        """Validate that repos exist and are git repos."""
+        from cli.validators import validate_repo, ValidationError
+
+        for repo_path in v:
+            try:
+                validate_repo(repo_path)
+            except ValidationError as e:
+                raise ValueError(str(e))
+        return v
 
 
 # ============================================================================

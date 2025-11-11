@@ -2,15 +2,14 @@
 
 Security Note (Local Use Only):
 This server is designed for LOCAL development only. It has:
-- No authentication
-- No rate limiting
+- No authentication (local use only)
+- Guardrails middleware (rate limiting, request size validation)
 - No encryption
 
 For production, add:
 - JWT authentication
 - HTTPS/TLS
-- Rate limiting
-- Input validation
+- Database encryption
 - Audit logging
 """
 
@@ -22,6 +21,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
+from cli.logger import setup_logger
+from backend.guardrails import GuardrailsMiddleware
 from config import API_HOST, API_PORT, CORS_ORIGINS_LIST
 from backend.models import (
     HealthResponse,
@@ -42,9 +43,8 @@ from backend.services import (
     DevelopmentSignatureService,
 )
 from exceptions import JanusException, NotFoundError
-from logger import get_logger
 
-logger = get_logger(__name__)
+logger = setup_logger(__name__)
 
 # ============================================================================
 # APP SETUP
@@ -62,6 +62,10 @@ app = FastAPI(
 # MIDDLEWARE
 # ============================================================================
 
+# ✅ GUARDRAIL: Add guardrails middleware BEFORE CORS
+# Middleware order matters: guardrails first (request validation)
+app.add_middleware(GuardrailsMiddleware)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -71,6 +75,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+logger.debug(f"✅ Middleware configured - Guardrails + CORS")
 logger.debug(f"CORS enabled for origins: {CORS_ORIGINS_LIST}")
 
 
@@ -396,6 +401,7 @@ async def startup_event():
     logger.info("🚀 Janus Clew API starting...")
     logger.info(f"API running on http://{API_HOST}:{API_PORT}")
     logger.info(f"Docs available at http://{API_HOST}:{API_PORT}/docs")
+    logger.info("✅ Guardrails middleware active (rate limiting, request size validation)")
 
 
 @app.on_event("shutdown")

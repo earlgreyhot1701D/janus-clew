@@ -6,6 +6,9 @@ import logging
 import time
 from typing import Dict, Any, Optional
 
+from cli.rate_limiter import RateLimiter
+from cli.timeout_handler import warn_if_slow, retry_with_backoff
+from cli.logger import setup_logger
 from config import (
     AMAZON_Q_CLI_TIMEOUT,
     AMAZON_Q_RETRY_ATTEMPTS,
@@ -13,13 +16,12 @@ from config import (
     CLI_USE_MOCK_DATA,
 )
 from exceptions import AWSQTimeoutError, AWSQRetryError, AWSQNotAvailableError
-from logger import get_logger
 
-logger = get_logger(__name__)
+logger = setup_logger(__name__)
 
 
 class AmazonQClient:
-    """Client for Amazon Q Developer analysis with retry logic."""
+    """Client for Amazon Q Developer analysis with retry logic and rate limiting."""
 
     def __init__(self):
         """Initialize Amazon Q client."""
@@ -27,6 +29,9 @@ class AmazonQClient:
         self.timeout = AMAZON_Q_CLI_TIMEOUT
         self.max_retries = AMAZON_Q_RETRY_ATTEMPTS
         self.backoff = AMAZON_Q_RETRY_BACKOFF
+
+        # ✅ GUARDRAIL: Rate limiter to prevent hammering AWS Q
+        self.rate_limiter = RateLimiter(max_calls_per_minute=3)
 
         if not self.available and not CLI_USE_MOCK_DATA:
             logger.warning("Amazon Q CLI not found. Falling back to mock analysis.")
@@ -53,6 +58,12 @@ class AmazonQClient:
     def analyze_with_cli(self, repo_path: str) -> Optional[str]:
         """Analyze repository using Amazon Q CLI with retry logic.
 
+        ✅ GUARDRAILS INTEGRATED:
+        - Rate limiting (max 3 calls/min)
+        - Timeout warnings (60s timeout)
+        - Retry with exponential backoff
+        - Token tracking
+
         Args:
             repo_path: Path to repository to analyze
 
@@ -71,6 +82,9 @@ class AmazonQClient:
             logger.debug("Amazon Q not available, using mock analysis")
             return self._get_mock_analysis(repo_path)
 
+        # ✅ GUARDRAIL: Rate limit before calling Q
+        self.rate_limiter.wait_if_needed()
+
         last_error = None
 
         for attempt in range(1, self.max_retries + 1):
@@ -84,8 +98,14 @@ class AmazonQClient:
                 )
 
                 if result.returncode == 0:
-                    logger.info(f"✓ Q analyzed {repo_path}")
-                    return result.stdout
+                    response_text = result.stdout
+
+                    # ✅ GUARDRAIL: Track tokens used
+                    token_count = self._estimate_tokens(response_text)
+                    self.rate_limiter.record_tokens(token_count)
+
+                    logger.info(f"✅ Q analyzed {repo_path} ({token_count} tokens)")
+                    return response_text
 
                 last_error = result.stderr or "Unknown error"
                 logger.warning(f"Q analysis failed: {last_error}")
@@ -98,7 +118,7 @@ class AmazonQClient:
 
             except subprocess.TimeoutExpired:
                 last_error = f"Timeout after {self.timeout}s"
-                logger.warning(f"Q analysis timeout: {last_error}")
+                logger.warning(f"⏱️  Q analysis timeout: {last_error}")
 
                 if attempt >= self.max_retries:
                     raise AWSQTimeoutError(self.timeout)
@@ -207,14 +227,14 @@ class AmazonQClient:
         repo_name = Path(repo_path).name
 
         mock_data = {
-            "Your-Honor": """This repository demonstrates intermediate Python skills 
-with AWS Bedrock integration. The developer has used Amazon Bedrock for RAG pipeline 
+            "Your-Honor": """This repository demonstrates intermediate Python skills
+with AWS Bedrock integration. The developer has used Amazon Bedrock for RAG pipeline
 construction with vector search capabilities. Code quality assessment: 6.2/10.""",
-            "Ariadne-Clew": """This repository shows advanced agentic AI patterns with AWS 
-Bedrock and AgentCore integration. The developer has progressed from basic RAG to 
+            "Ariadne-Clew": """This repository shows advanced agentic AI patterns with AWS
+Bedrock and AgentCore integration. The developer has progressed from basic RAG to
 sophisticated agent architectures. Code quality assessment: 7.1/10.""",
-            "TicketGlass": """This repository demonstrates expert-level implementation of 
-complex agentic systems. The developer has mastered AWS Bedrock, AgentCore, and 
+            "TicketGlass": """This repository demonstrates expert-level implementation of
+complex agentic systems. The developer has mastered AWS Bedrock, AgentCore, and
 advanced async Python patterns for production deployments. Code quality assessment: 8.1/10.""",
         }
 
@@ -234,3 +254,15 @@ advanced async Python patterns for production deployments. Code quality assessme
             "patterns": ["Async-first", "Clean code"],
             "raw_output": "Mock data",
         }
+
+    @staticmethod
+    def _estimate_tokens(text: str) -> int:
+        """Estimate tokens in response (~4 chars per token for Claude).
+
+        Args:
+            text: Text to estimate
+
+        Returns:
+            Estimated token count
+        """
+        return len(text) // 4
