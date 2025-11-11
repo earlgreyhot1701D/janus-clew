@@ -32,7 +32,7 @@ class AgentCoreCaller:
         """Get AgentCore client - uses Claude API via Bedrock."""
         try:
             import boto3
-            client = boto3.client('bedrock-runtime', region_name='us-west-2')
+            client = boto3.client('bedrock-runtime', region_name='us-east-1')
             logger.debug("Initialized Bedrock AgentCore client")
             return BedrockAgentCoreClient(client)
         except Exception as e:

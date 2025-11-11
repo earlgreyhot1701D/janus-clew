@@ -37,7 +37,7 @@ VERBOSE = os.getenv("JANUS_VERBOSE", "false").lower() == "true"
 # AWS CONFIGURATION
 # ============================================================================
 
-AWS_REGION = os.getenv("AWS_REGION", "us-west-2")
+AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 AWS_BUILDER_ID_EMAIL = os.getenv("AWS_BUILDER_ID_EMAIL", "")
 
 # Amazon Q CLI configuration
