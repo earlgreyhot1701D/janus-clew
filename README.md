@@ -289,8 +289,8 @@ Edit `.env` file:
 
 ```bash
 # AWS
-AWS_REGION=us-west-2
-AWS_BUILDER_ID_EMAIL=your@email.com
+AWS_REGION=us-east-1
+AWS_BUILDER_ID_EMAIL=lsjcordero@gmail.com
 
 # Environment
 JANUS_ENV=development
@@ -520,7 +520,7 @@ Good luck and enjoy tracking your progress! 🚀
 
 ---
 
-**Version:** 0.2.0  
-**Last Updated:** November 8, 2025  
+**Version:** 0.2.0
+**Last Updated:** November 8, 2025
 **Status:** Complete MVP Ready to Demo
 

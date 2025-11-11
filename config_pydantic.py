@@ -24,17 +24,17 @@ from config import (
 
 class AppSettings(BaseSettings):
     """Application settings with Pydantic validation and .env support.
-    
+
     Features:
     - Automatic .env file loading
     - Type validation
     - Environment variable overrides
     - Documented fields with defaults
-    
+
     Usage:
         from config_pydantic import app_settings
         print(app_settings.api_port)  # 3000
-        print(app_settings.aws_region)  # us-west-2
+        print(app_settings.aws_region)  # us-east-1
     """
 
     # Environment
@@ -44,7 +44,7 @@ class AppSettings(BaseSettings):
     janus_use_mock: bool = Field(default=False, description="Use mock AWS Q")
 
     # AWS
-    aws_region: str = Field(default="us-west-2", description="AWS region")
+    aws_region: str = Field(default="us-east-1", description="AWS region")
     aws_builder_id_email: str = Field(default="", description="AWS Builder ID email")
 
     # Server
