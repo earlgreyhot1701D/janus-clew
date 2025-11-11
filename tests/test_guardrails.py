@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 
 # Import guardrails modules
-from cli.logger import setup_logger, ColoredFormatter
+from logger import setup_logging, get_logger, ColoredFormatter
 from cli.validators import validate_repo, should_analyze_file, sanitize_for_prompt, ValidationError
 from cli.rate_limiter import RateLimiter
 from cli.timeout_handler import warn_if_slow, retry_with_backoff, TimeoutError as HandlerTimeoutError
@@ -21,14 +21,14 @@ class TestLogger:
     """Test cli.logger functionality."""
 
     def test_setup_logger_returns_logger(self):
-        """Test that setup_logger returns a valid logger."""
-        logger = setup_logger("test_logger")
+        """Test that get_logger returns a valid logger."""
+        logger = get_logger("test_logger")
         assert logger is not None
         assert logger.name == "test_logger"
 
     def test_setup_logger_has_handlers(self):
         """Test that logger has at least one handler."""
-        logger = setup_logger("test_logger_handlers")
+        logger = get_logger("test_logger_handlers")
         assert len(logger.handlers) > 0
 
     def test_colored_formatter_adds_colors(self):
@@ -325,14 +325,14 @@ class TestGuardrailsIntegration:
 
     def test_all_guardrails_import_without_error(self):
         """Test that all guardrails can be imported."""
-        from cli.logger import setup_logger
+        from logger import get_logger
         from cli.validators import validate_repo, should_analyze_file
         from cli.rate_limiter import RateLimiter
         from cli.timeout_handler import warn_if_slow, retry_with_backoff
         from backend.guardrails import GuardrailsMiddleware
-        
+
         assert all([
-            setup_logger,
+            get_logger,
             validate_repo,
             should_analyze_file,
             RateLimiter,

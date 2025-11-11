@@ -83,6 +83,7 @@ MIN_PROJECTS_FOR_GROWTH = 2
 # ============================================================================
 
 CLI_CACHE_RESULTS = os.getenv("JANUS_CACHE", "true").lower() == "true"
+CACHE_ENABLED = CLI_CACHE_RESULTS  # Alias for backward compatibility with analyzer.py
 CLI_USE_MOCK_DATA = os.getenv("JANUS_USE_MOCK", "false").lower() == "true"
 
 # ============================================================================

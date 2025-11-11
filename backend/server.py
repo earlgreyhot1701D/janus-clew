@@ -21,7 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from cli.logger import setup_logger
+from logger import get_logger
 from backend.guardrails import GuardrailsMiddleware
 from config import API_HOST, API_PORT, CORS_ORIGINS_LIST
 from backend.models import (
@@ -44,7 +44,7 @@ from backend.services import (
 )
 from exceptions import JanusException, NotFoundError
 
-logger = setup_logger(__name__)
+logger = get_logger(__name__)
 
 # ============================================================================
 # APP SETUP
@@ -185,21 +185,27 @@ async def status_endpoint():
 # ============================================================================
 
 @app.get("/api/analyses")
-async def get_all_analyses():
-    """Get all stored analyses.
+async def get_all_analyses(limit: int = 50, offset: int = 0):
+    """Get all stored analyses with pagination.
+
+    Args:
+        limit: Number of analyses to return (default: 50)
+        offset: Number of analyses to skip (default: 0)
 
     Returns:
-        List of all analyses sorted by timestamp (newest first)
+        Paginated list of analyses sorted by timestamp (newest first)
     """
-    logger.debug("GET /api/analyses")
+    logger.debug(f"GET /api/analyses (limit={limit}, offset={offset})")
     service = get_analysis_service()
 
     try:
-        analyses = service.get_all_analyses()
+        all_analyses = service.get_all_analyses()
+        paginated = all_analyses[offset:offset + limit]
+
         return AnalysesResponse(
             status="success",
-            count=len(analyses),
-            analyses=analyses,
+            count=len(all_analyses),  # Total count
+            analyses=paginated,  # Paginated results
         )
     except Exception as e:
         logger.error(f"Error getting analyses: {e}", exc_info=True)

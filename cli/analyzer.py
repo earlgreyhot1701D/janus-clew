@@ -4,17 +4,18 @@ import ast
 import logging
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
 from git import Repo
 
 from cli.validators import should_analyze_file, validate_repo, ValidationError as ValidatorError
-from cli.logger import setup_logger
+from logger import get_logger
 from config import CACHE_ENABLED
 from exceptions import GitParseError, InvalidRepositoryError, AnalysisError
 
-logger = setup_logger(__name__)
+logger = get_logger(__name__)
 
 
 # ============================================================================
@@ -316,7 +317,8 @@ class AnalysisEngine:
             return 0.0
 
         # ✅ REALISTIC THRESHOLDS FOR TRUST AND TRANSPARENCY
-        file_score = min(3.0, metrics["files"] / 50.0)  # Max at 50 files
+        # Use logarithmic scaling for file count (smoother growth tracking, no cliff at 50 files)
+        file_score = min(3.0, math.log10(max(1, metrics["files"])) * 1.0)
         function_density = metrics["functions"] / max(metrics["total_lines"] / 100.0, 1.0)
         function_score = min(4.0, function_density / 3.0)  # Max at 3/100 lines
         class_score = min(2.0, metrics["classes"] / 15.0)  # Max at 15 classes

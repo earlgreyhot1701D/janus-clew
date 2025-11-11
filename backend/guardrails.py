@@ -34,5 +34,18 @@ class GuardrailsMiddleware(BaseHTTPMiddleware):
 
         request_deque.append(now)
 
+        # ✅ GUARDRAIL: Cleanup old IP entries to prevent memory leak
+        if len(self.request_times) > 1000:  # If tracking >1000 IPs
+            # Find oldest IPs (smallest deque timestamps)
+            oldest_ips = sorted(
+                self.request_times.items(),
+                key=lambda x: min(x[1]) if x[1] else 0
+            )[:500]  # Remove oldest 500, keep newest 500
+
+            for ip, _ in oldest_ips:
+                del self.request_times[ip]
+
+            logger.debug(f"🧹 Cleaned up IP cache: now tracking {len(self.request_times)} IPs")
+
         response = await call_next(request)
         return response

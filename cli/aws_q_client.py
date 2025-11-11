@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional
 
 from cli.rate_limiter import RateLimiter
 from cli.timeout_handler import warn_if_slow, retry_with_backoff
-from cli.logger import setup_logger
+from logger import get_logger
 from config import (
     AMAZON_Q_CLI_TIMEOUT,
     AMAZON_Q_RETRY_ATTEMPTS,
@@ -17,7 +17,7 @@ from config import (
 )
 from exceptions import AWSQTimeoutError, AWSQRetryError, AWSQNotAvailableError
 
-logger = setup_logger(__name__)
+logger = get_logger(__name__)
 
 
 class AmazonQClient:
