@@ -1,0 +1,48 @@
+default_agent: backend_agent
+agents:
+  backend_agent:
+    name: backend_agent
+    entrypoint: C:/Users/DXHubAWS/Documents/Janus Clew/backend/agent.py
+    deployment_type: container
+    runtime_type: null
+    platform: linux/arm64
+    container_runtime: none
+    source_path: C:\Users\DXHubAWS\Documents\Janus Clew\backend
+    aws:
+      execution_role: arn:aws:iam::833162255362:role/AmazonBedrockAgentCoreSDKRuntime-us-east-1-59a3b76927
+      execution_role_auto_create: false
+      account: '833162255362'
+      region: us-east-1
+      ecr_repository: 833162255362.dkr.ecr.us-east-1.amazonaws.com/bedrock-agentcore-backend_agent
+      ecr_auto_create: false
+      s3_path: null
+      s3_auto_create: false
+      network_configuration:
+        network_mode: PUBLIC
+        network_mode_config: null
+      protocol_configuration:
+        server_protocol: HTTP
+      observability:
+        enabled: true
+      lifecycle_configuration:
+        idle_runtime_session_timeout: null
+        max_lifetime: null
+    bedrock_agentcore:
+      agent_id: null
+      agent_arn: null
+      agent_session_id: null
+    codebuild:
+      project_name: null
+      execution_role: null
+      source_bucket: null
+    memory:
+      mode: STM_ONLY
+      memory_id: backend_agent_mem-ntpWAW3F0h
+      memory_arn: arn:aws:bedrock-agentcore:us-east-1:833162255362:memory/backend_agent_mem-ntpWAW3F0h
+      memory_name: backend_agent_mem
+      event_expiry_days: 30
+      first_invoke_memory_check_done: true
+      was_created_by_toolkit: false
+    authorizer_configuration: null
+    request_header_configuration: null
+    oauth_configuration: null
