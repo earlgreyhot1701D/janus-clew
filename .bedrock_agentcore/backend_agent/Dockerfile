@@ -27,5 +27,5 @@ USER bedrock_agentcore
 
 EXPOSE 8000 8080
 
-# Simple, direct CMD that works in ARM64
-CMD ["python", "-m", "agent"]
+# Run the agent entrypoint
+CMD ["python", "agent.py"]
