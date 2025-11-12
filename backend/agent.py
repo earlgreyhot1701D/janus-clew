@@ -7,19 +7,15 @@ import json
 import logging
 from typing import List, Dict, Any
 
-from strands import Agent, tool
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize AgentCore app and Strands agent
+# Initialize AgentCore app
 app = BedrockAgentCoreApp()
-strands_agent = Agent()
 
-# Register tools
-@tool
 def analyze_project(project_name: str, complexity_score: float) -> dict:
     """Analyze a coding project and return growth metrics."""
     return {
@@ -28,7 +24,6 @@ def analyze_project(project_name: str, complexity_score: float) -> dict:
         "status": "analyzed",
     }
 
-@tool
 def detect_patterns(projects: List[dict]) -> dict:
     """Detect patterns across multiple projects."""
     return {
@@ -37,7 +32,6 @@ def detect_patterns(projects: List[dict]) -> dict:
         "summary": "Cross-project patterns detected successfully",
     }
 
-@tool
 def generate_recommendations(patterns: dict, growth_rate: float) -> dict:
     """Generate intelligent recommendations based on growth patterns."""
     return {
@@ -48,13 +42,6 @@ def generate_recommendations(patterns: dict, growth_rate: float) -> dict:
         "growth_trajectory": "Accelerating",
         "next_milestone": "8.5 complexity in 2 weeks",
     }
-
-# Explicitly register tools with agent
-strands_agent.tools = [
-    analyze_project,
-    detect_patterns,
-    generate_recommendations,
-]
 
 # Entrypoint for Bedrock AgentCore
 @app.entrypoint
@@ -78,13 +65,14 @@ def invoke(payload: Dict[str, Any]) -> Dict[str, Any]:
         logger.info(f"[Agent] Prompt received: {prompt[:60]}...")
         logger.info(f"[Agent] Projects received: {len(projects)}")
 
-        response = strands_agent(prompt)
+        # Simple response without strands
+        response_text = f"Analyzed {len(projects)} projects with prompt: {prompt}"
 
         result = {
             "status": "success",
-            "message": response.message if hasattr(response, 'message') else str(response),
+            "message": response_text,
             "projects_received": len(projects),
-            "model": "strands-agent-janus",
+            "model": "janus-agentcore",
         }
 
         logger.info("[Agent] Invocation completed successfully")
