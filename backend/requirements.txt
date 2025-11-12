@@ -1,5 +1,4 @@
 # Agent Framework
-strands-agents>=0.1.0
 bedrock-agentcore>=0.2.0
 bedrock-agentcore-starter-toolkit>=0.1.21
 
@@ -13,6 +12,7 @@ uvicorn[standard]>=0.24.0
 
 # Data Processing
 pydantic>=2.0.0
+PyYAML>=6.0.0
 
 # Async
 aiofiles>=23.0.0
