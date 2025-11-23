@@ -2,12 +2,12 @@ default_agent: backend_agent
 agents:
   backend_agent:
     name: backend_agent
-    entrypoint: backend/agent.py
+    entrypoint: C:/Users/DXHubAWS/Documents/Janus Clew/backend/agent.py
     deployment_type: container
     runtime_type: null
     platform: linux/arm64
     container_runtime: none
-    source_path: backend
+    source_path:
     aws:
       execution_role: arn:aws:iam::833162255362:role/AmazonBedrockAgentCoreSDKRuntime-us-east-1-59a3b76927
       execution_role_auto_create: false
@@ -43,6 +43,9 @@ agents:
       event_expiry_days: 30
       first_invoke_memory_check_done: true
       was_created_by_toolkit: false
+    identity:
+      credential_providers: []
+      workload: null
     authorizer_configuration: null
     request_header_configuration: null
     oauth_configuration: null
