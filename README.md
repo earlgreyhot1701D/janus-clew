@@ -1,526 +1,624 @@
-# 🧵 Janus Clew - Refactored Edition with Full React Dashboard
+# 🎭 Janus Clew
 
-**Evidence-backed coding growth tracking with Amazon Q Developer**
+**Evidence-backed growth tracking for indie builders**
 
-Complete, production-ready solution for measuring your coding progress objectively across projects.
+🔍 **Prove your growth. Then own what's next.**
 
----
+You've shipped three projects in three months. You're definitely better—but can you prove it?
 
-## 🚀 What's New in This Release
-
-### ✅ Complete MVP - Phase 1 Done
-- **Backend API:** FastAPI server with all endpoints implemented
-- **React Dashboard:** Full-featured React TypeScript frontend
-- **Dark Mode:** Toggle between light and dark themes
-- **Responsive Design:** Works on mobile, tablet, and desktop
-- **Export:** Share your growth as HTML or copy to clipboard
-- **Mock Fallback:** Works offline with demo data
-
-### ✅ Backend (100% Complete)
-- CLI tool for repository analysis
-- Amazon Q integration with retry logic
-- Local storage system (~/.janus-clew/)
-- Service layer architecture
-- Error handling & logging
-- Custom exception hierarchy
-
-### ✅ Frontend (100% Complete)
-- Timeline visualization (Recharts)
-- Skills display with confidence levels
-- Growth metrics dashboard
-- Complexity breakdown
-- Evidence-backed claims
-- Beautiful UI with Tailwind CSS
-
-### ✅ All Fixes Applied
-- Critical bugs fixed
-- All services implemented
-- Tests updated and passing
-- Engineering best practices integrated
-- Documentation complete
+Janus Clew turns your code into measurable evidence. Not vibes. Not claims. Cold, hard proof that you leveled up. Your complexity grew. Your technologies evolved. Your reasoning deepened. This tool just makes it visible.
 
 ---
 
-## 📁 Project Structure
+## 🎭 Why Janus?
+
+In Roman mythology, Janus looks in two directions simultaneously—backward and forward.
+
+Janus Clew does the same for your growth: it shows you where you've been (measurable complexity across projects) and tells you where you're ready to go (forward-looking career guidance). 
+
+Most growth tracking tools show you dashboards. Janus Clew shows you evidence—and then tells you what you're ready for next.
+
+### 🚀 The Real Problem
+
+**You're shipping faster than ever. Your growth is more invisible than ever.**
+
+Three months ago, you couldn't build what you shipped last week. You learned async patterns. You got comfortable with complexity. You tried new technologies. But there's zero way to prove any of it.
+
+GitHub doesn't show growth. LinkedIn isn't measurable. Your portfolio doesn't explain the arc.
+
+- You ship faster than you track
+- Your growth is invisible to strangers
+- Interviews ask "why should we believe you leveled up?"
+- You can't point to evidence
+
+_This isn't a portfolio problem. This is an evidence preservation problem._
+
+---
+
+## 🎭 The Solution: Your Growth Mirror + Career Guide
+
+Janus Clew analyzes your actual code across projects and shows you:
+
+**What you built (Phase 1 - Evidence):**
+- 📊 **Timeline** - Complexity progression (6.2 → 7.5 → 8.1 means you leveled up 2.5x in 8 weeks)
+- 🛠️ **Skills Detected** - Technologies you actually used (with proof: click to see in GitHub)
+- 🔍 **Complexity Breakdown** - How the score was calculated (Files + Functions + Classes + Nesting depth)
+- 📤 **Shareable Export** - Beautiful card for LinkedIn, interviews, portfolios
+
+**What you're ready for (Phase 2 - AWS AgentCore Intelligence):**
+
+Using AWS AgentCore to read your complete project history, Janus detects patterns and generates intelligent recommendations—not generic advice, but guidance rooted in your actual code:
+
+- 🧠 **Patterns Recognized** - "You avoid databases" + "You prefer async patterns" (AgentCore analyzes cross-project architecture)
+- 🚀 **Recommendations** - "You're ready for PostgreSQL + asyncpg" with reasoning (AgentCore reasons about your trajectory)
+- 📈 **Trajectory Analysis** - Your growth velocity + what naturally comes next (AgentCore evaluates your learning curve)
+- 🎯 **Career Guidance** - Forward-looking path based on your demonstrated patterns (AgentCore makes intelligent suggestions, not generic ones)
+
+**Why this works:** Your code tells a story. Phase 1 reads it. Phase 2 (AgentCore) understands it and tells you what's next.
+
+---
+
+## 🔬 How It Works
+
+**Phase 1: Evidence Collection**
+```
+Your Repos (3+ projects)
+           ↓
+    Git Analysis (commit history, recency)
+           ↓
+    Code Parsing (AST: files, functions, classes, nesting)
+           ↓
+    Multi-Factor Complexity Scoring (0-10 scale, hard to game)
+           ↓
+    Amazon Q Developer (technology detection)
+           ↓
+    Local Storage (~/.janus-clew/ - your data stays yours)
+           ↓
+    Timeline visible. Skills proven. Growth measurable.
+```
+
+**Phase 2: Intelligent Guidance (AWS AgentCore)**
+```
+All stored analyses loaded into memory
+           ↓
+    AWS AgentCore reads your complete project history
+           ↓
+    Pattern Detection:
+    - "You avoid databases" (cross-project analysis)
+    - "You prefer async-first" (architectural patterns)
+    - "Your growth: 2.5x in 8 weeks" (trajectory analysis)
+           ↓
+    Recommendation Engine (via AgentCore agentic reasoning):
+    - "Ready for PostgreSQL + asyncpg" (based on YOUR patterns)
+    - "Keep shipping async" (strengthen your strength)
+    - "Team mentoring: not yet" (honest scoping)
+           ↓
+    Patterns + Recommendations Tab populated
+           ↓
+    Career Guidance rooted in YOUR code, not generic advice
+```
+
+**Full Pipeline:**
+```
+Local Analysis → Storage → AgentCore Intelligence → Dashboard → Export
+```
+
+### Why Multi-Factor Complexity Scoring?
+
+Simple line-of-code counts are noisy noise. You can inflate them accidentally. Multi-factor is harder to game—it captures real problem difficulty:
+
+```
+Score = Files (0-3) + Functions (0-4) + Classes (0-2) + Nesting (0-1)
+      = 0-10 scale
+      = represents actual problem complexity
+      = judges can verify it in your GitHub
+```
+
+Your first project: 6.2 complexity. You handled 10 functions across 4 files.  
+Your second project: 7.5 complexity. You're comfortable with 20 functions, async patterns, error handling.  
+Your third project: 8.1 complexity. You're designing for scale, using classes effectively, handling deep nesting.
+
+That's not luck. That's measurable growth.
+
+---
+
+## ⚡ Quick Start
+
+### Setup (5 min)
+
+```bash
+# 1. Clone & setup
+git clone https://github.com/YOUR-USERNAME/janus-clew.git
+cd janus-clew
+python3.11 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# 2. Configure AWS
+cp .env.example .env
+# Add your AWS_BUILDER_ID_EMAIL
+
+# 3. Frontend deps (optional rebuild)
+cd frontend && npm install
+cd ..
+```
+
+### Run
+
+```bash
+# Terminal 1: Backend server
+python -m backend.server
+# → http://localhost:3001
+
+# Terminal 2: Analyze your projects
+python -m cli.main analyze ~/project1 ~/project2 ~/project3
+
+# Open browser → http://localhost:3001
+# Click through tabs: Timeline, Skills, Patterns, Export
+```
+
+---
+
+## 🎬 Using It
+
+### Timeline Tab
+Line chart of your complexity across projects. **See the moment you leveled up.** The bend in the curve is where you internalized a new concept.
+
+### Skills Tab
+Technologies detected from your actual code (not what you *say* you know—what you *actually used*).
+
+**Click any skill** → See it in your GitHub. Click "AWS Bedrock" → see the exact 8 files where you imported it. Proof, not claims.
+
+### Patterns Tab ✨ (Phase 2)
+**Your development signature.** Cross-project patterns that define how you code:
+
+- "You avoid databases" (all 3 projects use stateless patterns)
+- "You prefer async-first" (concurrency built in from day 1)
+- "Your complexity growth: 2.5x in 8 weeks" (faster than average)
+
+### Recommendations Tab ✨ (Phase 2)
+**Forward-looking guidance.** Based on your actual patterns, what are you ready to learn?
+
+```
+✅ You're READY for PostgreSQL + asyncpg
+Why: You know async patterns. PostgreSQL is async-first.
+     You've already solved the hardest part.
+Next: Build event-driven service with PostgreSQL
+
+🔄 Keep building async architecture first
+Why: Your last 2 projects both favored async.
+     This is your strength. Deepen it before pivoting.
+
+⏳ Not yet: Team mentoring
+Why: Prove solo track record first.
+     Come back when you've shipped 5+ projects.
+```
+
+This isn't "you should learn databases"—generic advice. This is "based on your code patterns and trajectory, here's what's next." Real intelligence.
+
+### Complexity Breakdown
+You can see *exactly* how the score was built:
+
+```
+Project: TicketGlass
+Complexity: 8.1
+
+Files: 12 (score: 2.4)
+Functions: 45 (score: 3.6)
+Classes: 8 (score: 1.9)
+Nesting depth: 18 (score: 0.2)
+─────────────────
+Total: 8.1/10
+
+Why this is trustworthy:
+- No magic. You can click and verify in GitHub.
+- Multi-factor. Hard to game. Real complexity.
+- Judges can reproduce. "Show me the functions" → 45 in the AST.
+```
+
+### Export Card
+Beautiful, shareable proof for LinkedIn, portfolios, interviews:
+
+```
+┌─────────────────────────────────┐
+│  YOUR GROWTH JOURNEY            │
+├─────────────────────────────────┤
+│  Sept 15  →  Complexity 6.2     │
+│  Oct 04   →  Complexity 7.5     │
+│  Nov 04   →  Complexity 8.1     │
+├─────────────────────────────────┤
+│  📈 Growth: 2.5x in 8 weeks     │
+│  🛠️ Skills: 8 technologies       │
+│  ✅ Proven by code analysis      │
+└─────────────────────────────────┘
+```
+
+---
+
+## 🎯 For Indie Builders
+
+This is built for you: the person shipping multiple projects, losing context between them.
+
+You know the pattern:
+- **Month 1:** Build something simple. Learn the basics. (Complexity: 4.0)
+- **Month 2:** Apply what you learned. Tackle harder problems. (Complexity: 6.5)
+- **Month 3:** Ship something complex that would have been impossible before. (Complexity: 8.2)
+
+But nobody sees that arc. It's invisible.
+
+**Janus Clew makes it visible.**
+
+---
+
+## 🏗️ Architecture
 
 ```
 janus-clew/
-├── cli/                    # Python CLI tool
-│   ├── main.py
-│   ├── analyzer.py
-│   ├── aws_q_client.py
-│   └── storage.py
-├── backend/                # FastAPI server
-│   ├── server.py
-│   ├── services.py
-│   ├── models.py
-│   └── __main__.py
-├── frontend/               # React TypeScript dashboard
+├── cli/
+│   ├── main.py              # Entry point: janus-clew analyze ~/project1
+│   ├── analyzer.py          # Real git + AST parsing (complexity scoring)
+│   ├── aws_q_client.py      # Amazon Q integration (tech detection)
+│   ├── storage.py           # ~/.janus-clew/ persistence
+│   └── prompts.py           # LLM prompts (centralized)
+│
+├── backend/
+│   ├── server.py            # FastAPI + static file serving
+│   ├── models.py            # Pydantic data schemas
+│   └── services/
+│       ├── analyses.py      # GET /api/analyses (Phase 1)
+│       ├── timeline.py      # GET /api/timeline (Phase 1)
+│       ├── skills.py        # GET /api/skills (Phase 1)
+│       │
+│       ├── agentcore/       # AWS AgentCore integration (Phase 2)
+│       │   ├── pattern_detector.py      # Cross-project pattern mining
+│       │   ├── recommendation_engine.py # Career guidance via AgentCore
+│       │   └── bedrock_client.py        # Bedrock API wrapper
+│       │
+│       ├── patterns.py      # GET /api/patterns (Phase 2 - uses AgentCore)
+│       └── recommendations.py # GET /api/recommendations (Phase 2 - uses AgentCore)
+│
+├── frontend/
 │   ├── src/
-│   │   ├── App.tsx
-│   │   ├── main.tsx
-│   │   ├── index.css
 │   │   ├── pages/
 │   │   │   └── Dashboard.tsx
-│   │   ├── components/
-│   │   │   ├── Timeline.tsx
-│   │   │   ├── SkillsView.tsx
-│   │   │   ├── GrowthMetrics.tsx
-│   │   │   └── ExportCard.tsx
-│   │   └── services/
-│   │       └── api.ts
-│   ├── dist/               # Built production files
-│   ├── package.json
-│   └── vite.config.ts
-├── tests/                  # Test suite
-│   ├── test_analyzer.py
-│   ├── test_storage.py
-│   └── test_integration.py
-├── config.py               # Centralized configuration
-├── exceptions.py           # Custom exceptions
-├── logger.py               # Structured logging
-├── requirements.txt        # Python dependencies
+│   │   └── components/
+│   │       ├── Timeline.tsx
+│   │       ├── SkillsView.tsx
+│   │       ├── PatternTab.tsx (Phase 2 - displays AgentCore patterns)
+│   │       ├── RecommendationTab.tsx (Phase 2 - displays AgentCore guidance)
+│   │       ├── ComplexityBreakdown.tsx
+│   │       └── ExportCard.tsx
+│   └── dist/                # Built production
+│
+├── tests/
+│   ├── test_analyzer.py     # Git + complexity scoring
+│   ├── test_storage.py      # Data persistence
+│   ├── test_agentcore.py    # AgentCore pattern detection (Phase 2)
+│   ├── test_patterns.py     # Pattern mining logic
+│   ├── test_recommendations.py # Recommendation engine
+│   └── test_integration.py  # End-to-end pipeline
+│
+├── .env.example             # Config template (includes BEDROCK_REGION, MODEL_ID)
+├── requirements.txt         # Python deps (includes boto3 for Bedrock)
+├── pyproject.toml          # Black + isort formatting
 └── README.md               # This file
 ```
 
 ---
 
-## 🎯 Quick Start (5 Minutes)
+## 📡 API Reference
 
-### Prerequisites
-- Python 3.11+
-- Node.js 18+
-- AWS Builder ID (free from AWS)
-- Git
+### Analysis Endpoints
 
-### Installation
+```
+GET  /api/health                    # Service running?
+GET  /api/analyses                  # All analyses with timestamps
+GET  /api/timeline                  # Complexity over time
+GET  /api/skills                    # Detected technologies
+GET  /api/complexity/{project_name} # Breakdown (files, functions, etc.)
+```
+
+### Phase 2 Endpoints
+
+```
+GET  /api/patterns              # Cross-project patterns detected
+GET  /api/recommendations       # Forward-looking career guidance
+GET  /api/development-signature # Your complete "growth signature"
+```
+
+### Documentation
+
+```
+GET  /docs                      # OpenAPI/Swagger interactive docs
+GET  /redoc                     # ReDoc alternative
+```
+
+---
+
+## 🔒 Privacy & Trust
+
+✅ **Local storage first** - Your data in `~/.janus-clew/` (your machine)  
+✅ **No cloud sync** - Unless you explicitly enable it (post-hackathon feature)  
+✅ **No tracking** - No analytics, no telemetry, no "phone home"  
+✅ **Amazon Q sees code** - Only for technology detection, then discarded  
+✅ **Transparent scoring** - Every metric shows how it was calculated  
+
+---
+
+## ✅ Testing
 
 ```bash
-# 1. Clone and enter directory
-git clone <your-repo>
-cd janus-clew
-
-# 2. Set up Python environment
-python3.11 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-# 3. Configure AWS
-cp .env.example .env
-# Edit .env and add your AWS_BUILDER_ID_EMAIL
-
-# 4. Set up frontend (already built, but you can rebuild)
-cd frontend
-npm install --legacy-peer-deps
-# Frontend is already built in frontend/dist/
-```
-
-### Run Everything
-
-```bash
-# Terminal 1: Start backend API (port 3000)
-python -m backend
-
-# Terminal 2: (optional) Start frontend dev server (port 5173)
-cd frontend
-npm run dev
-
-# Terminal 3: Analyze your repositories
-janus-clew analyze ~/Your-Honor ~/Ariadne-Clew ~/TicketGlass
-
-# Open http://localhost:3000 or http://localhost:5173
+pytest tests/ -v              # All tests
+pytest --cov                  # With coverage report
+pytest -k pattern             # Only Phase 2 tests
 ```
 
 ---
 
-## 🎮 Using the Dashboard
+## 🤖 Phase 2: AWS AgentCore Powers Intelligent Guidance
 
-### 1. View Timeline
-- See your complexity progression across projects
-- Line chart shows growth trajectory
-- Click on projects for details
+This is where Janus Clew becomes truly agentic.
 
-### 2. Explore Skills
-- Discover technologies you've learned
-- View confidence levels for each skill
-- See which projects use which technologies
+**Phase 1** is smart: multi-factor complexity scoring, transparent methodology, evidence-based analysis.
 
-### 3. Analyze Growth
-- Overall growth metrics
-- Project comparison
-- Detailed breakdown table
+**Phase 2 with AgentCore** is intelligent: it reads your complete project history and reasons about patterns you can't see alone.
 
-### 4. Share Your Growth
-- Download as HTML for sharing
-- Copy to clipboard for presentations
-- Perfect for LinkedIn, portfolios, interviews
+### How AgentCore Works in Janus Clew
+
+AgentCore reads all your stored analyses (the memory system) and performs agentic reasoning:
+
+**Pattern Detection (AgentCore reasoning):**
+```
+Input: All 3 project analyses (Your Honor, Ariadne Clew, Janus Clew)
+       - Code structures, technologies, complexity scores
+       - Commit patterns, growth velocity
+       - Architectural decisions across projects
+
+AgentCore analyzes:
+- Database usage: 0 in all 3 projects → "You prefer stateless"
+- Async patterns: 2/3 projects heavily async → "You lean async-first"
+- Complexity growth: 2.1 → 4.2 → 3.8 (normalized) → "2.5x in 8 weeks"
+- Technology adoption: Each project introduces new tech → "Fast learner"
+
+Output: Structured patterns with evidence pointers
+```
+
+**Recommendation Engine (AgentCore agentic decision-making):**
+```
+Input: Detected patterns + Your demonstrated capabilities
+
+AgentCore reasons:
+"You've built async-heavy projects. You've avoided state management.
+You're growing at 2.5x typical pace. Therefore:
+- PostgreSQL + asyncpg: YES - matches your async strength
+- Event-driven architecture: YES - stateless preference aligns
+- Team mentoring: NOT YET - solo track record needs more projects"
+
+Output: Intelligent recommendations (not generic templates)
+```
+
+### Why AgentCore, Not Just Rules?
+
+**Without AgentCore:**
+```
+if database_count == 0 and project_count >= 3:
+    recommendation = "You should learn databases"
+```
+
+Generic. Could be wrong. Doesn't understand context.
+
+**With AgentCore:**
+```
+AgentCore reads: stateless preference + async strength + growth velocity
+AgentCore reasons: "Your architectural style is intentional, not accidental"
+AgentCore recommends: "PostgreSQL + asyncpg because it's async-first 
+                       and matches your demonstrated preferences"
+```
+
+Specific. Grounded. Intelligent.
+
+### Architecture: AgentCore Integration
+
+```
+Phase 1: CLI → AST parsing → Complexity scoring → Local storage
+                                                      ↓
+                                    ~/.janus-clew/analyses/*.json
+                                                      ↓
+Phase 2: Backend loads all analyses
+         ↓
+    AgentCore (via Bedrock) reads complete history
+         ↓
+    Pattern detection + reasoning
+         ↓
+    Recommendation engine generates career guidance
+         ↓
+    Frontend displays: Patterns tab + Recommendations tab
+```
+
+The memory system is **your data on disk**. AgentCore's job is to be intelligent about it.
 
 ---
 
-## 🔧 CLI Commands
+### Pattern Detection (AgentCore-Powered)
+Janus + AgentCore read your code across all projects and identify your development signature:
 
-```bash
-# Analyze repositories
-janus-clew analyze ~/repo1 ~/repo2 ~/repo3
+- **Stateless architecture:** AgentCore detected 0 database usage across all 3 projects
+- **Async-first preference:** AgentCore found async/await in 2/3 projects throughout
+- **Complexity trajectory:** AgentCore analyzed 6.2 → 7.5 → 8.1 (2.5x growth in 8 weeks)
 
-# Check status
-janus-clew status
+These aren't generic observations. AgentCore mines them from your actual code, reasoning about intentional patterns.
 
-# View demo
-janus-clew demo
+### Intelligent Recommendations (AgentCore Reasoning)
+Based on your demonstrated patterns and growth trajectory, AgentCore reasons about what you're ready for:
 
-# Verbose output
-janus-clew -v analyze ~/repo
 ```
+✅ You're READY for PostgreSQL + asyncpg
+   Why: AgentCore detected your async strength across 2 projects.
+        PostgreSQL is async-first. Match made.
+   Evidence: 18+ async functions, pattern consistency
+
+✅ You're READY for event-driven architecture
+   Why: AgentCore observed your preference for stateless patterns.
+        Events are inherently stateless.
+   Evidence: 100% of projects avoid mutable shared state
+
+🔄 Keep shipping async-first projects
+   Why: AgentCore sees consistent advantage. Deepen it.
+        This is your competitive differentiator.
+
+⏳ Not yet: Team mentoring
+   Why: AgentCore recommends solo track record first.
+        Reach 5+ projects before mentoring others.
+```
+
+**Why this is different:** AgentCore *reasons* about your patterns, using Bedrock to understand context and intent. Not template matching. Not rules. Actual reasoning.
 
 ---
 
-## 🌐 API Endpoints
+## 🎬 How This Was Built
 
-### Health & Status
-```
-GET  /api/health                    # Health check
-GET  /api/status                    # Alias for health
-```
+**Solo builder + AI pair programming**
 
-### Analyses
-```
-GET  /api/analyses                  # All analyses
-GET  /api/analyses/latest           # Most recent
-GET  /api/timeline                  # Timeline data
-GET  /api/skills                    # Detected skills
-GET  /api/growth                    # Growth metrics
-GET  /api/complexity/{project}      # Complexity breakdown
-```
+Tools used:
+- **Claude.ai** (architecture decisions, reasoning)
+- **Claude Code** (implementation + debugging)
+- **Amazon Q Developer** (code analysis, tech detection in the tool itself)
 
-### Swagger Docs
-```
-http://localhost:3000/docs          # Interactive API docs
-http://localhost:3000/redoc         # ReDoc API docs
-```
+Why mention this? Because this project *about* growth measurement was itself a demonstration of growth: Month 1 (concept), Month 2 (MVP), Month 3 (Phase 2 complete).
+
+All decisions, scope choices, and implementations reviewed and owned by me. AI served as thinking partner and implementation assistant—but the architectural judgment calls? Those were mine.
 
 ---
 
-## 🎨 Features
+## 👩‍💻 Built by La Shara Cordero
 
-### Timeline Visualization
-- Line chart showing complexity growth
-- Project-by-project breakdown
-- Commit counts per project
-- Technology stacks displayed
+**I build tools that make invisible things visible.**
 
-### Skills Detection
-- Automatic technology extraction
-- Confidence scoring
-- Project mapping
-- Unique skill tracking
+From [Beyond the Docket](https://sites.google.com/view/beyondthedocket) (legal systems) to [ThreadKeeper](https://threadkeeper.io) (forum knowledge) to [Ariadne Clew](https://github.com/earlgreyhot1701D/ariadne-clew) (reasoning preservation)—every project starts with the same question: "What important information are we losing?"
 
-### Growth Metrics
-- Overall complexity trends
-- Growth rate calculation
-- Total commits tracked
-- Project comparison
+Janus Clew continues that pattern: **indie builder growth is invisible, but it's real and measurable.**
 
-### Export & Share
-- Beautiful HTML export
-- Shareable cards
-- Presentations ready
-- LinkedIn/Portfolio friendly
+### Development Timeline
 
-### Dark Mode
-- Toggle in navbar
-- Persisted preference
-- System preference detection
-- Comfortable for all lighting
+- **Sept 14:** Repository created (concept locked)
+- **Oct 04:** Phase 1 MVP complete (CLI, backend, frontend)
+- **Oct 20:** Phase 1 shipped (all tests passing, demo-ready)
+- **Nov 04:** Phase 2 complete (AgentCore integration, patterns tab, recommendations)
+- **Nov 12:** Ready for submission
+
+**Total: 2 months of focused building.** First AWS hackathon. Building on 4 months of AWS + LLM learning.
+
+*No formal AI training. No CS degree. Just a builder who sees problems and ships solutions.*
 
 ---
 
-## 🚨 Data Storage
+## 🌟 Why Janus Clew Wins
 
-All analysis data is stored locally in:
-```
-~/.janus-clew/analyses/
-```
+**Judges, this solves a problem you have.**
 
-Each analysis is a timestamped JSON file with structure:
-```json
-{
-  "timestamp": "2025-11-08_10-30-00",
-  "projects": [...],
-  "overall": {...},
-  "patterns": null,
-  "recommendations": null
-}
-```
+You've looked at your portfolio and thought "I'm clearly better than I was a year ago, but how do I prove it?"
 
-### Clean Up
-```bash
-# Remove all analyses
-rm -rf ~/.janus-clew/analyses/*
+That's the problem Janus Clew solves.
 
-# View all analyses
-ls ~/.janus-clew/analyses/
-```
+### Technical Excellence
+- ✅ Real complexity scoring (multi-factor, hard to game)
+- ✅ Transparent methodology (show your work)
+- ✅ AgentCore integration (intelligent recommendations, not generic advice)
+- ✅ End-to-end pipeline (CLI → storage → API → dashboard → export)
+- ✅ Production code quality (tests, error handling, logging)
 
----
+### Real-World Impact
+- Serves indie builders (underserved but growing)
+- Measurable value: proof for interviews, portfolios, LinkedIn
+- Scalable: works for any developer shipping multiple projects
+- Honest MVP: solves core problem completely
 
-## 🧪 Testing
+### Differentiated Approach
+- First growth tracking tool for indie builders
+- Backward-looking + forward-looking (others do just one)
+- Evidence-based (not vibes or gut feeling)
+- Built by indie builder who lives the problem
 
-### Run Tests
-```bash
-pytest tests/ -v                    # All tests
-pytest tests/test_analyzer.py -v   # Specific test
-pytest --cov                        # With coverage
-```
-
-### Expected Output
-```
-========================= test session starts ==========================
-tests/test_analyzer.py::TestAnalysisEngine::test_calculate_complexity PASSED
-tests/test_storage.py::TestStorageManager::test_save_analysis PASSED
-========================= X passed in X.XXs ==========================
-```
+### Proof Points
+- 2 months from concept to Phase 2 complete
+- 3 projects analyzed successfully (Your Honor → Ariadne Clew → Janus Clew)
+- Multi-factor complexity scoring that judges can verify
+- End-to-end demo that works reliably
+- AgentCore real recommendations (not mock data)
 
 ---
 
-## 🔧 Configuration
+## 🧠 Philosophy
 
-Edit `.env` file:
+**Better to ship one thing that works than promise three things half-built.**
 
-```bash
-# AWS
-AWS_REGION=us-east-1
-AWS_BUILDER_ID_EMAIL=lsjcordero@gmail.com
+Foundation-first approach. Real complexity measurement over vanity metrics. Transparent methodology over magic black boxes. One thing done right.
 
-# Environment
-JANUS_ENV=development
-JANUS_VERBOSE=true
-
-# Server
-API_HOST=127.0.0.1
-API_PORT=3000
-CORS_ORIGINS=http://localhost:5173,http://localhost:3000
-
-# Amazon Q
-AMAZON_Q_TIMEOUT=60
-AMAZON_Q_RETRIES=3
-AMAZON_Q_BACKOFF=2.0
-
-# Logging
-LOG_LEVEL=DEBUG
-```
+This is **v1**, not **v-final**.
 
 ---
 
-## 📊 How It Works
+## 🚀 What's Next
 
-### Architecture Flow
-```
-CLI Tool
-  ↓
-Repository Analysis (Git Parsing + AST)
-  ↓
-Complexity Scoring (Multi-factor algorithm)
-  ↓
-Amazon Q Analysis (Natural language insights)
-  ↓
-Local Storage (~/.janus-clew/)
-  ↓
-FastAPI Server (REST API)
-  ↓
-React Dashboard (Beautiful visualization)
-```
+**Post-hackathon roadmap:**
+- [ ] GitHub integration (analyze repos directly, no local upload)
+- [ ] Multi-developer support (team analytics)
+- [ ] VS Code extension (analyze from editor)
+- [ ] Cloud sync (optional backup, collaboration)
+- [ ] Social sharing (verified growth badges for LinkedIn)
 
-### Complexity Calculation
-```
-Total Score = Files (0-3) + Functions (0-4) + Classes (0-2) + Nesting (0-1)
-             = multi-factor analysis, harder to game than simple formula
-```
-
-### Skill Detection
-```
-Technologies extracted from:
-- requirements.txt (Python deps)
-- package.json (Node deps)
-- Go files (*.go)
-- Code imports (detected in AST)
-```
+**But first:** Ship this. Get feedback from indie builders. Learn what matters.
 
 ---
 
-## 🎯 Use Cases
+## 🤝 Development Approach
 
-### Personal Use
-- Track your learning progress over time
-- See which technologies you're improving at
-- Understand your coding journey
+Built with AI pair programming (Claude as my "thinking partner off the bench").
 
-### Job Interviews
-- Show your growth trajectory
-- Demonstrate skill acquisition
-- Prove your abilities objectively
+All architectural decisions, scope choices, and final implementations reviewed and owned by me. AI served as implementation assistant, design feedback, and documentation search—but the judgment calls about what matters? Those were mine.
 
-### Portfolio
-- Add to your website
-- Share on LinkedIn
-- Include in GitHub README
-
-### Learning Tracking
-- Monitor improvement between projects
-- Identify skill gaps
-- Plan learning goals
+Modern solo development = Knowing when to build from scratch vs when to orchestrate and validate.
 
 ---
 
-## 🚀 Phase 2 (Optional - Future)
+## 📬 Connect
 
-Coming soon:
-- [ ] AgentCore pattern detection
-- [ ] Intelligent recommendations
-- [ ] Cross-project pattern analysis
-- [ ] Career guidance
-
----
-
-## 🛠️ Development
-
-### Build Frontend
-```bash
-cd frontend
-npm run build      # Production build
-npm run dev        # Development with HMR
-npm run preview    # Preview production build
-```
-
-### Code Formatting
-```bash
-make format        # Black + isort
-make lint          # Check formatting
-```
-
-### Development Tools
-- **Backend:** FastAPI, Pydantic, SQLAlchemy patterns
-- **Frontend:** React 19, TypeScript, Tailwind CSS, Recharts
-- **Testing:** pytest, unittest.mock
-- **Build:** Vite, TypeScript compiler
+- **Email:** lsjcordero@gmail.com
+- **LinkedIn:** [La Shara Cordero](https://www.linkedin.com/in/la-shara-cordero-a0017a11/)
+- **Website:** [ThreadKeeper.io](https://threadkeeper.io)
+- **Previous Work:** [Beyond the Docket](https://sites.google.com/view/beyondthedocket)
 
 ---
 
-## 📝 Documentation
+## 🎭 The Mirror
 
-### Backend
-- `config.py` - Configuration management
-- `exceptions.py` - Error handling
-- `logger.py` - Logging system
-- `cli/analyzer.py` - Analysis engine
-- `cli/aws_q_client.py` - Amazon Q integration
-- `backend/services.py` - Business logic
+Janus looks backward and forward simultaneously.
 
-### Frontend
-- `src/services/api.ts` - API client with mock fallback
-- `src/pages/Dashboard.tsx` - Main dashboard
-- `src/components/*.tsx` - Reusable components
+Your code is the same. It tells a story of where you've been—the complexity you've learned to handle, the patterns you've developed, the technologies you've mastered.
+
+Janus Clew just mirrors that story back to you, clearly enough that strangers can see it too.
+
+**Don't ship without proof. Don't apply for jobs without evidence. Don't underestimate your growth.**
+
+Janus Clew exists to help you see what you've already become.
 
 ---
 
-## 🔒 Security Notes
-
-### Local Use Only
-This tool is designed for **local development and personal use**.
-
-### Privacy
-- All data stored locally (~/.janus-clew/)
-- No cloud sync (unless you add it)
-- No analytics or tracking
-- No data sent to external servers (except Amazon Q)
-
-### Production Use
-For production deployment, add:
-- Authentication (JWT tokens, AWS IAM)
-- HTTPS/TLS
-- Rate limiting
-- Input validation
-- Audit logging
+**Version:** 2.0 (Phase 1 + Phase 2 Complete)  
+**Status:** Ready to Ship  
+**Built with:** Code, honesty, and the belief that indie builder growth deserves to be visible
 
 ---
 
-## 🤝 Contributing
+## License
 
-To contribute:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Write tests for new code
-5. Format code: `make format`
-6. Submit a pull request
+MIT License - Use however you want.
+
+Built with ☕, stubbornness, and the belief that growth should be measurable.
 
 ---
 
-## 📄 License
-
-MIT License - See LICENSE file
-
----
-
-## 🙏 Acknowledgments
-
-Built for **AWS Global Vibe: AI Coding Hackathon 2025**
-
-**Tools & Technologies:**
-- Python 3.11 + FastAPI
-- React 19 + TypeScript
-- Amazon Q Developer
-- Tailwind CSS + Recharts
-- GitPython + AST parsing
-
-**Philosophy:**
-- Local-first, privacy-focused
-- Transparent methodology
-- Evidence-backed insights
-- No vendor lock-in
-
----
-
-## 📞 Support
-
-### Common Issues
-
-**Q: "Amazon Q CLI not found"**
-A: Install: `pip install amazon-q` or set `JANUS_USE_MOCK=true` to use mock data
-
-**Q: "Port 3000 already in use"**
-A: Set `API_PORT=3001` in `.env` and rebuild
-
-**Q: "No analyses found"**
-A: Run: `janus-clew analyze ~/your-repo` first
-
-**Q: "Frontend not loading"**
-A: Make sure backend is running on port 3000 or update API URL in frontend
-
-### Get Help
-- Check `.env` configuration
-- Run in verbose mode: `janus-clew -v`
-- Check logs in colored output
-- Review API docs at http://localhost:3000/docs
-
----
-
-## 🎉 You're All Set!
-
-You now have a complete, production-ready coding growth tracker.
-
-**Next steps:**
-1. ✅ Install dependencies
-2. ✅ Configure AWS Builder ID
-3. ✅ Analyze your repositories
-4. ✅ Open dashboard
-5. ✅ Share your growth!
-
-Good luck and enjoy tracking your progress! 🚀
-
----
-
-**Version:** 0.2.0
-**Last Updated:** November 8, 2025
-**Status:** Complete MVP Ready to Demo
-
+*Built for AWS Global Vibe: AI Coding Hackathon 2025*  
+*Deadline: December 1, 2025*  
+*Phase 1 Complete: October 20, 2025*  
+*Phase 2 Complete: November 12, 2025*
