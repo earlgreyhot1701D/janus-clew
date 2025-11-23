@@ -159,6 +159,156 @@ python -m cli.main analyze ~/project1 ~/project2 ~/project3
 
 ---
 
+## 🚀 Deploying to AWS Bedrock AgentCore
+
+### Prerequisites
+
+- **AWS Account** with credentials configured
+- **Python 3.11+** with virtual environment
+- **AWS Permissions** for Bedrock AgentCore, ECR, CodeBuild, IAM
+- **bedrock-agentcore-starter-toolkit** installed
+
+### Installation
+
+```powershell
+# Install the AgentCore toolkit
+pip install bedrock-agentcore-starter-toolkit
+
+# Verify installation
+agentcore --help
+```
+
+### Configuration
+
+Your `.bedrock_agentcore.yaml` should look like this:
+
+```yaml
+default_agent: backend_agent
+agents:
+  backend_agent:
+    name: backend_agent
+    entrypoint: backend/agent.py
+    deployment_type: container
+    platform: linux/arm64
+    source_path: null  # Upload entire project
+    aws:
+      region: us-east-1
+      # ... other AWS settings
+```
+
+**Key settings:**
+- `entrypoint: backend/agent.py` - Relative path (not absolute Windows path)
+- `source_path: null` - Uploads entire project to CodeBuild
+- `platform: linux/arm64` - Required for Bedrock AgentCore Runtime
+
+### Critical Fix: Dockerfile Location
+
+⚠️ **Important:** The toolkit generates a Dockerfile in `.bedrock_agentcore/backend_agent/Dockerfile`, but CodeBuild expects it at the project root.
+
+**Before deploying, run:**
+
+```powershell
+# Copy Dockerfile to project root
+Copy-Item .bedrock_agentcore\backend_agent\Dockerfile -Destination Dockerfile
+
+# Verify the Dockerfile
+Get-Content Dockerfile | Select-Object -First 10
+```
+
+**The Dockerfile should have:**
+```dockerfile
+CMD ["opentelemetry-instrument", "python", "-m", "backend.agent"]
+```
+
+Note the **dot** in `backend.agent` (not slash) - this is correct module notation.
+
+### Deploy
+
+```powershell
+# Launch deployment (uses CodeBuild - no local Docker needed)
+agentcore launch --code-build --auto-update-on-conflict
+```
+
+This will:
+1. Upload your source code to S3
+2. Create a CodeBuild project
+3. Build ARM64 Docker image in the cloud
+4. Push image to ECR
+5. Deploy to Bedrock AgentCore Runtime
+
+**Deployment takes 5-10 minutes.**
+
+### Monitor Build Logs
+
+In a separate terminal, watch the build progress:
+
+```powershell
+aws logs tail /aws/codebuild/bedrock-agentcore-backend_agent-builder --follow --format short --region us-east-1
+```
+
+**Watch for these stages:**
+- ✅ `DOWNLOAD_SOURCE` - Getting code from S3
+- ✅ `BUILD` - Docker build (ARM64)
+- ✅ `POST_BUILD` - Push to ECR
+- ✅ `COMPLETED` - Success!
+
+### Verify Deployment
+
+```powershell
+# Check deployment status
+agentcore status
+
+# Should show:
+# - agent_arn: arn:aws:bedrock-agentcore:...
+# - agent_id: (non-null)
+# - Status: Ready
+```
+
+### Test Your Agent
+
+```powershell
+# Test invocation
+agentcore invoke '{"prompt":"Analyze my growth","projects":[]}' --session-id test-01
+```
+
+**Expected response:**
+```json
+{
+  "status": "success",
+  "projects_analyzed": 0,
+  "patterns": [],
+  "recommendations": ["Keep building..."],
+  "model": "bedrock-agentcore-janus"
+}
+```
+
+### Troubleshooting
+
+**Build fails: "requirements.txt not found"**
+- Make sure `source_path: null` in YAML (not `source_path: backend`)
+- This ensures the entire project is uploaded, not just the backend folder
+
+**Build fails: "Dockerfile not found"**
+- Copy Dockerfile to project root: `Copy-Item .bedrock_agentcore\backend_agent\Dockerfile -Destination Dockerfile`
+
+**CMD syntax error in Dockerfile**
+- Should be: `CMD ["python", "-m", "backend.agent"]` (with **dot**)
+- NOT: `CMD ["python", "-m", "backend/agent"]` (slash doesn't work)
+
+**Permission errors**
+- Ensure AWS credentials are configured: `aws sts get-caller-identity`
+- Check IAM permissions for Bedrock AgentCore, ECR, CodeBuild
+
+### Clean Up
+
+To destroy the deployed agent:
+
+```powershell
+agentcore destroy --agent backend_agent --force
+```
+
+---
+
 ## 🎬 Using It
 
 ### Timeline Tab
