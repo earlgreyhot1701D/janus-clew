@@ -1,82 +1,33 @@
 # ============================================================================
-# JANUS CLEW - Python Requirements
-# Python 3.13+ compatible
+# JANUS CLEW - Core Dependencies
+# Last known working: Nov 23, 2024
 # ============================================================================
 
-# ============================================================================
-# CLI Framework & Tools
-# ============================================================================
-click==8.1.8                # CLI framework for main.py
-GitPython==3.1.43           # Git repository interface (updated for Py 3.13)
-python-dotenv==1.0.1        # Load .env configuration files
+# CLI Framework
+click==8.1.7
+gitpython==3.1.40
 
-# ============================================================================
-# AWS SDK & AgentCore
-# ============================================================================
-boto3==1.40.52              # AWS SDK (minimum required by bedrock-agentcore 1.0.6)
-botocore==1.40.52           # AWS SDK core (matches boto3)
-bedrock-agentcore==1.0.6    # AWS Bedrock AgentCore SDK (confirmed working)
+# Web Framework & Server
+fastapi==0.109.0
+uvicorn==0.27.0
 
-# ============================================================================
-# Web Framework & Server (Backend)
-# ============================================================================
-fastapi==0.115.6            # Web framework (updated for Py 3.13)
-uvicorn[standard]==0.34.0   # ASGI server with standard extras
-starlette==0.41.3           # ASGI framework (fastapi dependency)
+# Data Validation
+pydantic==2.8.0
+typing-extensions==4.12.2
 
-# ============================================================================
-# Data Validation & Serialization
-# ============================================================================
-pydantic==2.10.4            # Data validation v2 (updated, user confirmed 2.8.0+ works)
-pydantic-core==2.27.2       # Pydantic core (matches pydantic 2.10.4)
-typing-extensions==4.12.2   # Typing backports for older Python (optional for 3.13 but safe)
+# File Operations
+aiofiles==23.2.1
 
-# ============================================================================
-# Async & File Operations
-# ============================================================================
-aiofiles==24.1.0            # Async file operations (updated)
-
-# ============================================================================
-# Utilities
-# ============================================================================
-pytz==2024.2                # Timezone support (updated)
-
-# ============================================================================
-# Common Dependencies (auto-installed but pinned for reproducibility)
-# ============================================================================
-annotated-types==0.7.0      # Pydantic dependency
-anyio==4.8.0                # Async framework (fastapi/starlette dependency)
-certifi==2024.12.14         # SSL certificates
-charset-normalizer==3.4.1   # Character encoding detection
-h11==0.14.0                 # HTTP/1.1 protocol (uvicorn dependency)
-httpcore==1.0.7             # HTTP client core (used by httpx if needed)
-httptools==0.6.4            # HTTP parser (uvicorn[standard])
-httpx==0.28.1               # HTTP client (fastapi testing)
-idna==3.10                  # Internationalized domain names
-jmespath==1.0.1             # JSON query language (boto3 dependency)
-python-dateutil==2.9.0      # Date utilities (boto3 dependency)
-python-multipart==0.0.20    # Multipart form data parser (fastapi dependency)
-PyYAML==6.0.2               # YAML parser (uvicorn[standard])
-requests==2.32.3            # HTTP library (various dependencies)
-s3transfer==0.10.4          # S3 transfer manager (boto3 dependency)
-six==1.17.0                 # Python 2/3 compatibility (boto3 dependency)
-sniffio==1.3.1              # Async library sniffer (anyio dependency)
-urllib3==2.3.0              # HTTP library (boto3/requests dependency)
-watchfiles==1.0.4           # File watcher (uvicorn[standard])
-websockets==14.2            # WebSocket support (uvicorn[standard])
-
-# Note: uvloop removed - Unix-only, not supported on Windows
-# uvicorn[standard] will use native Windows event loop instead
+# Development Tools
+pytest==7.4.4
+pytest-asyncio==0.21.0
+pytest-cov==4.1.0
+black==24.1.0
+isort==5.13.2
 
 # ============================================================================
 # Notes:
-# - All versions tested with Python 3.13.1 on Windows
-# - bedrock-agentcore 1.0.6 confirmed working by user
-# - bedrock-agentcore 1.0.6 requires boto3>=1.40.52 (updated Nov 2024)
-# - pydantic 2.10.4 is compatible (user confirmed 2.8.0+ works)
-# - boto3 1.40.52 minimum required for bedrock-agentcore compatibility
-# - GitPython 3.1.43 (note capitalization) for Python 3.13 compatibility
-# - uvicorn[standard] includes httptools, websockets, watchfiles
-# - uvloop removed for Windows compatibility (Unix-only package)
-# - Windows will use native asyncio event loop (works perfectly)
+# - boto3 and bedrock-agentcore are NOT included here
+# - Install those separately if needed: pip install boto3 bedrock-agentcore
+# - This is the last known working configuration from Nov 23, 2024
 # ============================================================================
