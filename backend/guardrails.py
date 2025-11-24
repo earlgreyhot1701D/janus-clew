@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class GuardrailsMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, max_request_size=10_000_000, requests_per_minute=10):
+    def __init__(self, app, max_request_size=10_000_000, requests_per_minute=100):
         super().__init__(app)
         self.max_request_size = max_request_size
         self.requests_per_minute = requests_per_minute
