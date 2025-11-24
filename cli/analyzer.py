@@ -90,6 +90,7 @@ class AnalysisEngine:
     - Intelligent caching (only re-analyzes changed files)
     - Growth rate calculation (track progression between projects)
     - Technology detection (AWS Bedrock, AgentCore, etc.)
+    - Amazon Q Developer integration for intelligent analysis
     - Comprehensive error handling with detailed logging
     """
 
@@ -162,6 +163,7 @@ class AnalysisEngine:
 
         ✅ CACHING: Check if repo commit hasn't changed before full analysis
         ✅ GUARDRAILS: Skip files using validator + limit to 100 files
+        ✅ AMAZON Q: Integrate real Amazon Q Developer analysis
 
         Args:
             repo_path: Path to repository
@@ -216,6 +218,23 @@ class AnalysisEngine:
             except (StopIteration, Exception):
                 pass
 
+            # ✅ AMAZON Q: Get Q Developer analysis
+            q_analysis = None
+            try:
+                from cli.aws_q_client import AmazonQClient
+                q_client = AmazonQClient()
+                q_result = q_client.analyze_repository(repo_path)
+                q_analysis = {
+                    "skill_level": q_result.get("skill_level", "intermediate"),
+                    "technologies": q_result.get("technologies", []),
+                    "patterns": q_result.get("patterns", []),
+                    "source": q_result.get("source", "unknown"),
+                }
+                logger.debug(f"Q analysis: {q_analysis['source']}")
+            except Exception as e:
+                logger.warning(f"Q analysis failed for {repo_name}: {e} (using None)")
+                q_analysis = None
+
             analysis = {
                 "name": repo_name,
                 "path": repo_path,
@@ -224,7 +243,7 @@ class AnalysisEngine:
                 "complexity_score": complexity,
                 "technologies": techs,
                 "first_commit": first_commit,
-                "q_analysis": None,  # Will be populated by AWS Q
+                "q_analysis": q_analysis,
             }
 
             # ✅ CACHE: Save successful analysis

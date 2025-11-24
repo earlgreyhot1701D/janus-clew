@@ -10,7 +10,6 @@ from config import ERROR_MESSAGES, SUCCESS_MESSAGES, VERBOSE, DEBUG
 from logger import get_logger
 from exceptions import JanusException, NoRepositoriesError
 from cli.analyzer import AnalysisEngine
-from cli.aws_q_client import AmazonQClient
 from cli.storage import StorageManager
 
 logger = get_logger(__name__)
@@ -45,12 +44,25 @@ def analyze(ctx: click.Context, repos: tuple, force: bool):
         click.secho(SUCCESS_MESSAGES["analysis_start"], fg="cyan", bold=True)
         click.echo()
 
-        # Step 1: Analyze repositories
-        click.secho("📊 Step 1: Analyzing code complexity...", fg="blue", bold=True)
+        # Step 1: Analyze repositories (includes Amazon Q integration)
+        click.secho("📊 Step 1: Analyzing code complexity & Amazon Q...", fg="blue", bold=True)
         try:
             analysis_engine = AnalysisEngine()
             analysis = analysis_engine.run(list(repos))
             logger.info(f"Analysis complete: {len(analysis['projects'])} projects analyzed")
+
+            # Display analysis progress
+            for project in analysis["projects"]:
+                tech_str = ", ".join(project["technologies"][:2])
+                if len(project["technologies"]) > 2:
+                    tech_str += f", +{len(project['technologies']) - 2} more"
+
+                q_source = "N/A"
+                if project.get("q_analysis"):
+                    q_source = project["q_analysis"].get("source", "unknown")
+
+                click.echo(f"   ✓ {project['name']}: {project['complexity_score']:.1f} complexity | Q: {q_source}")
+
         except JanusException as e:
             click.echo(f"{e}", err=True)
             logger.error(f"Analysis error: {e.code} - {e.message}", extra={"repos": list(repos)})
@@ -60,30 +72,8 @@ def analyze(ctx: click.Context, repos: tuple, force: bool):
             logger.error(f"Unexpected analysis error: {type(e).__name__}: {e}", exc_info=True, extra={"repos": list(repos)})
             sys.exit(1)
 
-        # Step 2: Get Amazon Q insights
-        click.secho("🤖 Step 2: Running Amazon Q analysis...", fg="blue", bold=True)
-        try:
-            q_client = AmazonQClient()
-
-            for project in analysis["projects"]:
-                try:
-                    q_output = q_client.analyze_with_cli(project["path"])
-                    if q_output:
-                        parsed = q_client.parse_natural_language(q_output)
-                        project["q_analysis"] = parsed
-                        click.echo(f"   ✓ {project['name']}: Q analysis complete")
-                    else:
-                        click.echo(f"   ⚠️  {project['name']}: Q analysis skipped")
-                except Exception as e:
-                    logger.warning(f"Q analysis failed for {project['name']}: {e}")
-                    click.echo(f"   ⚠️  {project['name']}: Q analysis failed (using mock)")
-
-        except Exception as e:
-            logger.error(f"Q client error: {type(e).__name__}: {e}", exc_info=True)
-            click.echo(f"⚠️  Q analysis skipped due to error: {e}")
-
-        # Step 3: Save results
-        click.secho("💾 Step 3: Saving analysis...", fg="blue", bold=True)
+        # Step 2: Save results
+        click.secho("💾 Step 2: Saving analysis...", fg="blue", bold=True)
         try:
             storage = StorageManager()
             filepath = storage.save_analysis(analysis)
@@ -93,7 +83,7 @@ def analyze(ctx: click.Context, repos: tuple, force: bool):
             logger.error(f"Storage error: {e.code} - {e.message}")
             sys.exit(1)
 
-        # Step 4: Display results
+        # Step 3: Display results
         click.secho()
         click.secho("📈 Your Growth Journey", fg="green", bold=True)
         click.secho("=" * 60, fg="green")
@@ -109,9 +99,18 @@ def analyze(ctx: click.Context, repos: tuple, force: bool):
             click.echo(f"   Commits: {project['commits']}")
             click.echo(f"   Technologies: {tech_str}")
 
+            # Display Q analysis if available
             if project.get("q_analysis"):
                 q_data = project["q_analysis"]
                 click.echo(f"   Skill Level: {q_data.get('skill_level', 'N/A')}")
+
+                if q_data.get("patterns"):
+                    patterns_str = ", ".join(q_data["patterns"][:2])
+                    if len(q_data["patterns"]) > 2:
+                        patterns_str += f", +{len(q_data['patterns']) - 2} more"
+                    click.echo(f"   Patterns: {patterns_str}")
+
+                click.echo(f"   Q Source: {q_data.get('source', 'unknown')}")
 
         click.echo()
         click.echo("=" * 60)
@@ -120,6 +119,7 @@ def analyze(ctx: click.Context, repos: tuple, force: bool):
         click.echo(f"Average Complexity: {avg:.1f}/10")
         click.echo(f"Growth Rate: {growth:+.1f}%")
 
+        # Display errors if any
         if analysis.get("errors"):
             click.echo()
             click.echo(f"⚠️  {len(analysis['errors'])} repositories failed:")
