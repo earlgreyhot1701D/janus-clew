@@ -154,88 +154,82 @@ class AnalysisEngine:
 
     @staticmethod
     def analyze_repo(repo_path: str) -> Dict[str, Any]:
-        """Analyze a single git repository with caching support.
-
-        ✅ CACHING: Check if repo commit hasn't changed before full analysis
+        """Analyze a single repository using AgentCore with validation.
 
         Args:
-            repo_path: Path to repository
+            repo_path: Path to git repository
 
         Returns:
-            Analysis dictionary for the repository
+            Analysis dictionary with complexity, technologies, patterns, etc.
 
         Raises:
-            InvalidRepositoryError: If not a valid git repo
-            GitParseError: If git parsing fails
+            InvalidRepositoryError: If repo path is invalid
+            AnalysisError: If analysis fails
         """
+        # Input validation
+        path = Path(repo_path)
+        if not path.exists():
+            logger.error(f"Repository path does not exist: {repo_path}")
+            raise InvalidRepositoryError(f"Path not found: {repo_path}")
+
+        if not path.is_dir():
+            logger.error(f"Repository path is not a directory: {repo_path}")
+            raise InvalidRepositoryError(f"Not a directory: {repo_path}")
+
+        # Load repo
         try:
             repo = Repo(repo_path)
         except Exception as e:
-            raise InvalidRepositoryError(repo_path)
+            logger.error(f"Failed to load repository: {repo_path} - {e}")
+            raise InvalidRepositoryError(f"Invalid git repository: {repo_path}")
 
-        path = Path(repo_path)
         repo_name = path.name
+        logger.debug(f"Analyzing repository: {repo_name}")
 
+        # Get git metadata
         try:
             commit_hash = repo.head.commit.hexsha[:7]
-        except Exception as e:
-            logger.warning(f"Could not get commit hash: {e}")
+        except Exception:
             commit_hash = "unknown"
 
-        # ✅ CACHE: Try to load cached result
-        cache_file = path / ".janus_analysis_cache.json"
-        cache_key = f"commit_{commit_hash}"
-        cache = load_cache(cache_file) if CACHE_ENABLED else {}
-
-        # ✅ CACHE: Return cached result if commit hasn't changed
-        if CACHE_ENABLED and cache_key in cache:
-            logger.info(f"📦 Cache hit: {repo_name} at commit {commit_hash}")
-            return cache[cache_key]
+        try:
+            commit_count = len(list(repo.iter_commits()))
+        except Exception:
+            commit_count = 0
+            logger.debug(f"{repo_name}: Could not get commit count")
 
         try:
-            # ✅ FULL ANALYSIS: Multi-factor complexity scoring
-            complexity = AnalysisEngine._calculate_complexity(repo_path)
-            techs = AnalysisEngine._detect_technologies(repo_path)
-
-            # Count commits
-            try:
-                commit_count = len(list(repo.iter_commits()))
-            except Exception as e:
-                logger.debug(f"Could not count commits: {e}")
-                commit_count = 0
-
-            # Get first commit timestamp
+            first_commit = repo.iter_commits().__next__().committed_datetime.isoformat()
+        except (StopIteration, Exception):
             first_commit = None
-            try:
-                first_commit = repo.iter_commits().__next__().committed_datetime.isoformat()
-            except (StopIteration, Exception):
-                pass
 
-            # TODO: Phase 2 - Replace with AgentCore integration
-            # Amazon Q integration removed - will be replaced with direct AgentCore analysis
-            q_analysis = None
-
-            analysis = {
-                "name": repo_name,
-                "path": repo_path,
-                "commit": commit_hash,
-                "commits": commit_count,
-                "complexity_score": complexity,
-                "technologies": techs,
-                "first_commit": first_commit,
-                "q_analysis": q_analysis,
-            }
-
-            # ✅ CACHE: Save successful analysis
-            if CACHE_ENABLED:
-                cache[cache_key] = analysis
-                save_cache(cache_file, cache)
-                logger.debug(f"Cached analysis for {repo_name}")
-
-            return analysis
-
+        # Call AgentCore for analysis
+        try:
+            from cli.agentcore_caller import AgentCoreCaller
+            caller = AgentCoreCaller()
+            agentcore_result = caller.analyze_repository(repo_path)
         except Exception as e:
-            raise GitParseError(repo_path, str(e))
+            logger.error(f"{repo_name}: AgentCore caller failed: {e}", exc_info=True)
+            raise AnalysisError(repo_name=repo_name, error=f"Failed to analyze: {e}")
+
+        # Build final analysis object
+        analysis = {
+            "name": repo_name,
+            "path": repo_path,
+            "commit": commit_hash,
+            "commits": commit_count,
+            "complexity_score": agentcore_result.get("complexity_score", 5.0),
+            "technologies": agentcore_result.get("technologies", []),
+            "patterns": agentcore_result.get("patterns", []),
+            "skill_level": agentcore_result.get("skill_level", "intermediate"),
+            "recommendations": agentcore_result.get("recommendations", []),
+            "first_commit": first_commit,
+            "agentcore_source": agentcore_result.get("source", "unknown"),
+        }
+
+        logger.info(f"✅ {repo_name}: Analysis complete (source: {analysis['agentcore_source']})")
+
+        return analysis
 
     @staticmethod
     def _calculate_complexity(repo_path: str) -> float:
