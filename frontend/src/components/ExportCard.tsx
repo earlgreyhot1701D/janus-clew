@@ -1,15 +1,49 @@
 import { Download, Share2, Copy } from 'lucide-react';
 import type { AnalysisData } from '../services/api';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { apiClient } from '../services/api';
 
 interface ExportCardProps {
   analysis: AnalysisData;
 }
 
+interface DevelopmentSignature {
+  patterns?: any[];
+  preferences?: any;
+  trajectory?: any;
+  recommendations?: any[];
+  amazon_q_technologies?: Record<string, number>;
+  agentcore_available?: boolean;
+}
+
 export default function ExportCard({ analysis }: ExportCardProps) {
   const [copied, setCopied] = useState(false);
+  const [signature, setSignature] = useState<DevelopmentSignature | null>(null);
+  const [loadingSignature, setLoadingSignature] = useState(true);
+
+  // Load signature data for Phase 2 content
+  useEffect(() => {
+    loadSignature();
+  }, []);
+
+  const loadSignature = async () => {
+    try {
+      setLoadingSignature(true);
+      const data = await apiClient.getDevelopmentSignature();
+      setSignature(data || {});
+    } catch (err) {
+      console.warn('Failed to load signature for export, using Phase 1 only', err);
+      setSignature(null);
+    } finally {
+      setLoadingSignature(false);
+    }
+  };
 
   const generateHTML = () => {
+    const patterns = signature?.patterns || [];
+    const recommendations = signature?.recommendations || [];
+    const amazonQTechs = signature?.amazon_q_technologies || {};
+
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,6 +73,7 @@ export default function ExportCard({ analysis }: ExportCardProps) {
             padding-bottom: 20px;
         }
         h1 { font-size: 2.5em; color: #0f766e; margin-bottom: 10px; }
+        h2 { font-size: 1.5em; color: #0f766e; margin: 30px 0 20px 0; }
         .subtitle { color: #64748b; font-size: 1.1em; }
         .metrics {
             display: grid;
@@ -55,7 +90,7 @@ export default function ExportCard({ analysis }: ExportCardProps) {
         }
         .metric-value { font-size: 2em; font-weight: bold; }
         .metric-label { font-size: 0.9em; opacity: 0.9; margin-top: 5px; }
-        .projects {
+        .section {
             margin-top: 40px;
         }
         .project {
@@ -65,7 +100,26 @@ export default function ExportCard({ analysis }: ExportCardProps) {
             border-radius: 8px;
             border-left: 4px solid #14b8a6;
         }
-        .project-name { font-size: 1.3em; font-weight: bold; color: #0f766e; margin-bottom: 10px; }
+        .pattern {
+            background: #f1f5f9;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #8b5cf6;
+        }
+        .recommendation {
+            background: #f1f5f9;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #06b6d4;
+        }
+        .project-name, .pattern-name, .rec-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #0f766e;
+            margin-bottom: 10px;
+        }
         .project-details {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -82,6 +136,37 @@ export default function ExportCard({ analysis }: ExportCardProps) {
             border-radius: 20px;
             font-size: 0.85em;
             margin: 2px;
+        }
+        .confidence {
+            display: inline-block;
+            background: #d1fae5;
+            color: #065f46;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 2px;
+        }
+        .amazon-q {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 2px;
+        }
+        .evidence {
+            color: #64748b;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        .status-ready {
+            color: #059669;
+            font-weight: bold;
+        }
+        .status-explore {
+            color: #0284c7;
+            font-weight: bold;
         }
         footer {
             margin-top: 40px;
@@ -115,8 +200,9 @@ export default function ExportCard({ analysis }: ExportCardProps) {
             </div>
         </div>
 
-        <div class="projects">
-            <h2 style="color: #0f766e; margin-bottom: 20px;">My Projects</h2>
+        <!-- PHASE 1: Projects -->
+        <div class="section">
+            <h2>📊 My Projects</h2>
             ${analysis.projects.map((p: any) => `
             <div class="project">
                 <div class="project-name">${p.name}</div>
@@ -132,7 +218,7 @@ export default function ExportCard({ analysis }: ExportCardProps) {
                     <div class="detail">
                         <div class="detail-label">Technologies</div>
                         <div>
-                            ${p.technologies.map((t: string) => `<span class="badge">${t}</span>`).join('')}
+                            ${p.technologies.map((t: string) => '<span class="badge">' + t + '</span>').join('')}
                         </div>
                     </div>
                 </div>
@@ -140,8 +226,74 @@ export default function ExportCard({ analysis }: ExportCardProps) {
             `).join('')}
         </div>
 
+        <!-- PHASE 2: Amazon Q Technologies -->
+        ${Object.keys(amazonQTechs).length > 0 ? `
+        <div class="section">
+            <h2>⚡ Technologies Detected by Amazon Q</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                ${Object.entries(amazonQTechs).map(([tech, count]: [string, number]) => `
+                <div style="background: #fef3c7; padding: 15px; border-radius: 8px; text-align: center;">
+                    <div style="font-weight: bold; color: #92400e;">${tech}</div>
+                    <div style="font-size: 0.9em; color: #b45309;">${count} project${count !== 1 ? 's' : ''}</div>
+                </div>
+                `).join('')}
+            </div>
+        </div>
+        ` : ''}
+
+        <!-- PHASE 2: Detected Patterns -->
+        ${patterns.length > 0 ? `
+        <div class="section">
+            <h2>🎯 Detected Patterns</h2>
+            ${patterns.map((p: any) => `
+            <div class="pattern">
+                <div class="pattern-name">${p.name}</div>
+                <div class="detail">${p.impact}</div>
+                <div class="evidence">
+                    <strong>Evidence:</strong>
+                    ${Array.isArray(p.evidence)
+                        ? p.evidence.slice(0, 2).map((e: string) => '<div>• ' + e + '</div>').join('')
+                        : '<div>• ' + p.evidence + '</div>'
+                    }
+                </div>
+                <div>
+                    <span class="confidence">${Math.round(p.confidence * 100)}% confidence</span>
+                    ${p.amazon_q_validated ? '<span class="amazon-q">✓ Q Confirmed</span>' : ''}
+                    ${p.amazon_q_detected ? '<span class="amazon-q">🔍 Q Detected</span>' : ''}
+                </div>
+            </div>
+            `).join('')}
+        </div>
+        ` : ''}
+
+        <!-- PHASE 2: Recommendations -->
+        ${recommendations.length > 0 ? `
+        <div class="section">
+            <h2>💡 Smart Recommendations</h2>
+            ${recommendations.slice(0, 3).map((r: any) => `
+            <div class="recommendation">
+                <div class="rec-name">${r.title}</div>
+                <div class="detail">${r.description}</div>
+                <div style="margin-top: 10px;">
+                    <strong>Why:</strong>
+                    <div style="color: #475569; margin-top: 5px;">${r.why}</div>
+                </div>
+                ${r.timeline ? '<div style="margin-top: 10px; color: #64748b; font-size: 0.9em;">⏱️ Timeline: ' + r.timeline + '</div>' : ''}
+                <div style="margin-top: 10px;">
+                    ${r.status === 'ready'
+                        ? '<span class="status-ready">✓ Ready Now</span>'
+                        : r.status === 'explore'
+                        ? '<span class="status-explore">💡 Consider</span>'
+                        : '<span style="color: #d97706; font-weight: bold;">⏸ Not Yet</span>'
+                    }
+                </div>
+            </div>
+            `).join('')}
+        </div>
+        ` : ''}
+
         <footer>
-            <p>Generated with Janus Clew v0.2.0</p>
+            <p>Generated with Janus Clew v0.3.0 (Phase 1 + Phase 2)</p>
             <p>Build your evidence-backed growth story at: https://github.com/yourusername/janus-clew</p>
         </footer>
     </div>
@@ -179,7 +331,7 @@ export default function ExportCard({ analysis }: ExportCardProps) {
           Share Your Growth
         </h3>
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
-          Export your analysis as a shareable HTML card or download it for presentations
+          Export your analysis as a shareable HTML card including patterns & recommendations
         </p>
       </div>
 
@@ -215,6 +367,14 @@ export default function ExportCard({ analysis }: ExportCardProps) {
               </span>
             ))}
           </div>
+
+          {!loadingSignature && (signature?.patterns?.length ?? 0) > 0 && (
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+              <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">
+                ✨ Includes {signature?.patterns?.length || 0} detected patterns + recommendations
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -233,7 +393,7 @@ export default function ExportCard({ analysis }: ExportCardProps) {
             </h4>
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Export as a beautiful HTML file you can share or present
+            Export your analysis as a shareable HTML card or download it for a presentation
           </p>
         </button>
 
@@ -268,6 +428,7 @@ export default function ExportCard({ analysis }: ExportCardProps) {
               <li>• Add to your portfolio or personal website</li>
               <li>• Include in presentations to potential employers</li>
               <li>• Track over time to visualize your learning progress</li>
+              <li>• Show patterns & recommendations as proof of learning</li>
             </ul>
           </div>
         </div>
