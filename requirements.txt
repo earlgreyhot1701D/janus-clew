@@ -62,9 +62,11 @@ s3transfer==0.10.4          # S3 transfer manager (boto3 dependency)
 six==1.17.0                 # Python 2/3 compatibility (boto3 dependency)
 sniffio==1.3.1              # Async library sniffer (anyio dependency)
 urllib3==2.3.0              # HTTP library (boto3/requests dependency)
-uvloop==0.21.0              # Fast event loop (uvicorn[standard], Unix only)
 watchfiles==1.0.4           # File watcher (uvicorn[standard])
 websockets==14.2            # WebSocket support (uvicorn[standard])
+
+# Note: uvloop removed - Unix-only, not supported on Windows
+# uvicorn[standard] will use native Windows event loop instead
 
 # ============================================================================
 # Notes:
@@ -73,6 +75,7 @@ websockets==14.2            # WebSocket support (uvicorn[standard])
 # - pydantic 2.10.4 is compatible (user confirmed 2.8.0+ works)
 # - boto3 1.35.77 provides better Python 3.13 support than 1.28.85
 # - GitPython 3.1.43 (note capitalization) for Python 3.13 compatibility
-# - uvicorn[standard] includes uvloop (Unix), httptools, websockets, watchfiles
-# - uvloop will be skipped on Windows automatically
+# - uvicorn[standard] includes httptools, websockets, watchfiles
+# - uvloop removed for Windows compatibility (Unix-only package)
+# - Windows will use native asyncio event loop (works perfectly)
 # ============================================================================
