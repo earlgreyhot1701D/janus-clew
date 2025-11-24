@@ -6,6 +6,7 @@ Manages prompts, responses, and error handling.
 
 import json
 import logging
+import subprocess
 from typing import Dict, List, Any, Optional
 from logger import get_logger
 from exceptions import JanusException
@@ -36,17 +37,28 @@ class AgentCoreCaller:
         Tries to use the actual deployed agent first, falls back to mock if unavailable.
         """
         try:
-            # Try to import and use the agentcore SDK
-            from agentcore import Client as AgentCoreClient
+            # Check if agentcore CLI is available and agent is running
+            result = subprocess.run(
+                ["agentcore", "status"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
 
-            logger.info("Initializing real AgentCore Runtime client")
-            # The agentcore SDK will use the configured agent from ~/.agentcore
-            client = RealAgentCoreClient()
-            logger.info("Real AgentCore client initialized successfully")
-            return client
+            if result.returncode == 0:
+                logger.info("AgentCore CLI is available and agent is ready")
+                client = RealAgentCoreClient()
+                logger.info("Real AgentCore client initialized successfully")
+                return client
+            else:
+                logger.warning(f"AgentCore status check failed: {result.stderr}, using mock client")
+                return MockAgentCoreClient()
 
-        except ImportError:
-            logger.warning("agentcore SDK not available, using mock client")
+        except FileNotFoundError:
+            logger.warning("AgentCore CLI not found in PATH, using mock client")
+            return MockAgentCoreClient()
+        except subprocess.TimeoutExpired:
+            logger.warning("AgentCore status check timed out, using mock client")
             return MockAgentCoreClient()
         except Exception as e:
             logger.warning(f"Failed to initialize real AgentCore client: {e}, using mock")
@@ -120,9 +132,6 @@ class RealAgentCoreClient:
     def __init__(self):
         """Initialize with deployed AgentCore agent."""
         try:
-            import subprocess
-            import json
-
             # Get agent status to verify it's running
             result = subprocess.run(
                 ["agentcore", "status"],
@@ -132,7 +141,7 @@ class RealAgentCoreClient:
             )
 
             if result.returncode == 0:
-                logger.info("AgentCore agent is ready")
+                logger.info("AgentCore agent is ready and responsive")
             else:
                 logger.warning(f"AgentCore status check returned: {result.stderr}")
 
@@ -152,9 +161,6 @@ class RealAgentCoreClient:
             Exception: If invocation fails
         """
         try:
-            import subprocess
-            import json
-
             logger.info("Invoking AgentCore agent via CLI")
 
             # Invoke agent via agentcore CLI
@@ -172,6 +178,7 @@ class RealAgentCoreClient:
 
             # Parse output - agentcore CLI returns JSON in Response: field
             output = result.stdout
+            logger.debug(f"AgentCore raw output: {output[:200]}...")
 
             # Extract JSON from output (it's usually in "Response:" section)
             if "Response:" in output:
@@ -189,7 +196,7 @@ class RealAgentCoreClient:
                                 json_str = json_str[:i+1]
                                 break
                     response = json.loads(json_str)
-                    logger.debug(f"Parsed AgentCore response: {response}")
+                    logger.info(f"Successfully parsed AgentCore response with {len(response.get('patterns', []))} patterns")
                     return response
 
             # If we can't parse, return the raw output as fallback
@@ -232,11 +239,19 @@ class MockAgentCoreClient:
             projects
         )
 
+        # Generate trajectory analysis
+        trajectory = self._generate_trajectory(projects)
+
         result = {
             "status": "success",
             "projects_analyzed": len(projects),
             "patterns": patterns,
             "recommendations": recommendations,
+            "trajectory": trajectory,
+            "preferences": {
+                "description": "Based on your project patterns and choices, you prefer building stateless, concurrent systems with cloud-first architecture.",
+                "traits": ["Stateless Design", "Async-First", "Cloud-Native", "Concurrent Systems"]
+            },
             "metrics": {
                 "average_complexity": sum(p.get("complexity_score", 0) for p in projects) / max(len(projects), 1) if projects else 0,
                 "pattern_count": len(patterns),
@@ -246,6 +261,59 @@ class MockAgentCoreClient:
 
         logger.debug(f"Mock response: {len(patterns)} patterns, {len(recommendations)} recommendations")
         return result
+
+    def _generate_trajectory(self, projects: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Generate learning trajectory based on projects.
+
+        Args:
+            projects: List of projects
+
+        Returns:
+            Trajectory analysis
+        """
+        if not projects:
+            return {
+                "current_level": "Beginner",
+                "growth_velocity": "Steady",
+                "next_milestone": "First Project"
+            }
+
+        complexities = [p.get("complexity_score", 0) for p in projects]
+        avg_complexity = sum(complexities) / len(complexities) if complexities else 0
+
+        if avg_complexity < 5:
+            level = "Beginner"
+        elif avg_complexity < 7:
+            level = "Intermediate"
+        elif avg_complexity < 8.5:
+            level = "Advanced"
+        else:
+            level = "Expert"
+
+        growth = 0
+        if len(complexities) > 1:
+            growth = complexities[-1] - complexities[0]
+
+        if growth > 2:
+            velocity = "Accelerating"
+        elif growth > 0:
+            velocity = "Steady"
+        else:
+            velocity = "Stable"
+
+        # Next milestone based on current level
+        milestones = {
+            "Beginner": "Intermediate (5.0+ complexity)",
+            "Intermediate": "Advanced (7.0+ complexity)",
+            "Advanced": "Expert (8.5+ complexity)",
+            "Expert": "Technical Leadership"
+        }
+
+        return {
+            "current_level": level,
+            "growth_velocity": velocity,
+            "next_milestone": milestones.get(level, "Mastery")
+        }
 
     def _generate_patterns(self, projects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Generate basic patterns based on project data.
