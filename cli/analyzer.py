@@ -10,7 +10,6 @@ from typing import Dict, List, Any, Optional
 
 from git import Repo
 
-from cli.validators import should_analyze_file, validate_repo, ValidationError as ValidatorError
 from logger import get_logger
 from config import CACHE_ENABLED
 from exceptions import GitParseError, InvalidRepositoryError, AnalysisError
@@ -90,7 +89,6 @@ class AnalysisEngine:
     - Intelligent caching (only re-analyzes changed files)
     - Growth rate calculation (track progression between projects)
     - Technology detection (AWS Bedrock, AgentCore, etc.)
-    - Amazon Q Developer integration for intelligent analysis
     - Comprehensive error handling with detailed logging
     """
 
@@ -112,9 +110,6 @@ class AnalysisEngine:
 
         for repo_path in repos:
             try:
-                # ✅ GUARDRAIL: Validate repo before analysis
-                validate_repo(repo_path)
-
                 safe_path = Path(repo_path).name or str(repo_path).replace("\n", "\\n")
                 logger.debug(f"Analyzing repository: {safe_path}")
 
@@ -122,7 +117,7 @@ class AnalysisEngine:
                 projects.append(analysis)
                 logger.info(f"✅ {analysis['name']}: {analysis['complexity_score']:.1f} complexity")
 
-            except (InvalidRepositoryError, GitParseError, AnalysisError, ValidatorError) as e:
+            except (InvalidRepositoryError, GitParseError, AnalysisError) as e:
                 # ✅ SECURITY: Sanitize error message (prevent log injection)
                 safe_path = Path(repo_path).name or str(repo_path).replace("\n", "\\n")
                 safe_error = str(e).replace("\n", " ")
@@ -162,8 +157,6 @@ class AnalysisEngine:
         """Analyze a single git repository with caching support.
 
         ✅ CACHING: Check if repo commit hasn't changed before full analysis
-        ✅ GUARDRAILS: Skip files using validator + limit to 100 files
-        ✅ AMAZON Q: Integrate real Amazon Q Developer analysis
 
         Args:
             repo_path: Path to repository
@@ -218,22 +211,9 @@ class AnalysisEngine:
             except (StopIteration, Exception):
                 pass
 
-            # ✅ AMAZON Q: Get Q Developer analysis
+            # TODO: Phase 2 - Replace with AgentCore integration
+            # Amazon Q integration removed - will be replaced with direct AgentCore analysis
             q_analysis = None
-            try:
-                from cli.aws_q_client import AmazonQClient
-                q_client = AmazonQClient()
-                q_result = q_client.analyze_repository(repo_path)
-                q_analysis = {
-                    "skill_level": q_result.get("skill_level", "intermediate"),
-                    "technologies": q_result.get("technologies", []),
-                    "patterns": q_result.get("patterns", []),
-                    "source": q_result.get("source", "unknown"),
-                }
-                logger.debug(f"Q analysis: {q_analysis['source']}")
-            except Exception as e:
-                logger.warning(f"Q analysis failed for {repo_name}: {e} (using None)")
-                q_analysis = None
 
             analysis = {
                 "name": repo_name,
@@ -261,8 +241,6 @@ class AnalysisEngine:
     def _calculate_complexity(repo_path: str) -> float:
         """Calculate multi-factor complexity score (0-10).
 
-        ✅ REFACTORED FOR TRUST & TRANSPARENCY (Nov 9, 2025):
-
         Realistic benchmarks that are harder to game:
         - Number of files (0-3 points): Max at 50+ files
         - Function density (0-4 points): Max at 3+ functions per 100 lines
@@ -275,11 +253,6 @@ class AnalysisEngine:
         - 4-6: Advanced (well-structured, clear patterns)
         - 6-8: Expert (sophisticated design, high quality)
         - 8-10: Master (exceptionally complex, professional grade)
-
-        ✅ GUARDRAILS INTEGRATED (Nov 10, 2025):
-        - File filtering: Skip node_modules, __pycache__, large files
-        - File count limit: Max 100 files analyzed
-        - Size check: Skip files >10MB
 
         Args:
             repo_path: Path to repository
@@ -298,13 +271,16 @@ class AnalysisEngine:
         try:
             all_py_files = list(Path(repo_path).rglob("*.py"))
 
-            # ✅ GUARDRAIL: Limit to 100 files analyzed
+            # Limit to 100 files analyzed
             if len(all_py_files) > 100:
                 logger.warning(f"⚠️  Repo has {len(all_py_files)} files. Analyzing first 100 only.")
                 all_py_files = all_py_files[:100]
 
-            # ✅ GUARDRAIL: Filter files using validator
-            analyzed_files = [f for f in all_py_files if should_analyze_file(f)]
+            # Basic file filtering (skip common exclusions)
+            analyzed_files = [
+                f for f in all_py_files
+                if not any(skip in str(f) for skip in ['node_modules', '__pycache__', '.git', 'venv', 'env'])
+            ]
 
             for py_file in analyzed_files:
                 try:

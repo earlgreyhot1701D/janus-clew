@@ -44,8 +44,8 @@ def analyze(ctx: click.Context, repos: tuple, force: bool):
         click.secho(SUCCESS_MESSAGES["analysis_start"], fg="cyan", bold=True)
         click.echo()
 
-        # Step 1: Analyze repositories (includes Amazon Q integration)
-        click.secho("📊 Step 1: Analyzing code complexity & Amazon Q...", fg="blue", bold=True)
+        # Step 1: Analyze repositories
+        click.secho("📊 Step 1: Analyzing repositories...", fg="blue", bold=True)
         try:
             analysis_engine = AnalysisEngine()
             analysis = analysis_engine.run(list(repos))
@@ -57,11 +57,7 @@ def analyze(ctx: click.Context, repos: tuple, force: bool):
                 if len(project["technologies"]) > 2:
                     tech_str += f", +{len(project['technologies']) - 2} more"
 
-                q_source = "N/A"
-                if project.get("q_analysis"):
-                    q_source = project["q_analysis"].get("source", "unknown")
-
-                click.echo(f"   ✓ {project['name']}: {project['complexity_score']:.1f} complexity | Q: {q_source}")
+                click.echo(f"   ✓ {project['name']}: {project['complexity_score']:.1f} complexity | {tech_str}")
 
         except JanusException as e:
             click.echo(f"{e}", err=True)
@@ -98,19 +94,6 @@ def analyze(ctx: click.Context, repos: tuple, force: bool):
             click.echo(f"   Complexity: {project['complexity_score']:.1f}/10")
             click.echo(f"   Commits: {project['commits']}")
             click.echo(f"   Technologies: {tech_str}")
-
-            # Display Q analysis if available
-            if project.get("q_analysis"):
-                q_data = project["q_analysis"]
-                click.echo(f"   Skill Level: {q_data.get('skill_level', 'N/A')}")
-
-                if q_data.get("patterns"):
-                    patterns_str = ", ".join(q_data["patterns"][:2])
-                    if len(q_data["patterns"]) > 2:
-                        patterns_str += f", +{len(q_data['patterns']) - 2} more"
-                    click.echo(f"   Patterns: {patterns_str}")
-
-                click.echo(f"   Q Source: {q_data.get('source', 'unknown')}")
 
         click.echo()
         click.echo("=" * 60)

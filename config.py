@@ -12,8 +12,8 @@ from typing import Literal
 # ============================================================================
 
 APP_NAME = "janus-clew"
-APP_VERSION = "0.2.0"
-APP_DESCRIPTION = "Evidence-backed coding growth tracking with Amazon Q Developer"
+APP_VERSION = "0.3.0"
+APP_DESCRIPTION = "Evidence-backed coding growth tracking with AWS AgentCore"
 PROJECT_ROOT = Path(__file__).parent.absolute()
 DATA_DIR = Path.home() / f".{APP_NAME}"
 ANALYSES_DIR = DATA_DIR / "analyses"
@@ -38,12 +38,7 @@ VERBOSE = os.getenv("JANUS_VERBOSE", "false").lower() == "true"
 # ============================================================================
 
 AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
-AWS_BUILDER_ID_EMAIL = os.getenv("AWS_BUILDER_ID_EMAIL", "")
-
-# Amazon Q CLI configuration
-AMAZON_Q_CLI_TIMEOUT = int(os.getenv("AMAZON_Q_TIMEOUT", "60"))
-AMAZON_Q_RETRY_ATTEMPTS = int(os.getenv("AMAZON_Q_RETRIES", "3"))
-AMAZON_Q_RETRY_BACKOFF = float(os.getenv("AMAZON_Q_BACKOFF", "2.0"))
+AWS_ACCOUNT_ID = os.getenv("AWS_ACCOUNT_ID", "")
 
 # ============================================================================
 # SERVER CONFIGURATION
@@ -84,7 +79,6 @@ MIN_PROJECTS_FOR_GROWTH = 2
 
 CLI_CACHE_RESULTS = os.getenv("JANUS_CACHE", "true").lower() == "true"
 CACHE_ENABLED = CLI_CACHE_RESULTS  # Alias for backward compatibility with analyzer.py
-CLI_USE_MOCK_DATA = os.getenv("JANUS_USE_MOCK", "false").lower() == "true"
 
 # ============================================================================
 # API CONFIGURATION
@@ -110,7 +104,6 @@ ERROR_MESSAGES = {
     "git_error": "❌ Git error analyzing {repo_name}: {error}",
     "analysis_error": "❌ Analysis failed for {repo_name}: {error}",
     "storage_error": "❌ Storage error: {error}",
-    "aws_q_error": "❌ Amazon Q error: {error}",
     "config_error": "❌ Configuration error: {error}",
     "no_data": "❌ No analysis data found. Run: janus-clew analyze <repos>",
 }
@@ -133,12 +126,14 @@ SUCCESS_MESSAGES = {
 
 def validate_config():
     """Validate critical configuration."""
-    if not AWS_BUILDER_ID_EMAIL and not CLI_USE_MOCK_DATA:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning(
-            "AWS_BUILDER_ID_EMAIL not set. Set it with: export AWS_BUILDER_ID_EMAIL=your@email.com"
-        )
+    import logging
+    logger = logging.getLogger(__name__)
+
+    if not AWS_REGION:
+        logger.warning("AWS_REGION not set. Using default: us-east-1")
+
+    if not AWS_ACCOUNT_ID:
+        logger.warning("AWS_ACCOUNT_ID not set. AgentCore integration may not work.")
 
 
 validate_config()
