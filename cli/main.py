@@ -57,7 +57,8 @@ def analyze(ctx: click.Context, repos: tuple, force: bool):
                 if len(project["technologies"]) > 2:
                     tech_str += f", +{len(project['technologies']) - 2} more"
 
-                click.echo(f"   ✓ {project['name']}: {project['complexity_score']:.1f} complexity | {tech_str}")
+                source = project.get("agentcore_source", "unknown")
+                click.echo(f"   ✓ {project['name']}: {project['complexity_score']:.1f} complexity | Source: {source}")
 
         except JanusException as e:
             click.echo(f"{e}", err=True)
@@ -94,6 +95,19 @@ def analyze(ctx: click.Context, repos: tuple, force: bool):
             click.echo(f"   Complexity: {project['complexity_score']:.1f}/10")
             click.echo(f"   Commits: {project['commits']}")
             click.echo(f"   Technologies: {tech_str}")
+
+            # Display AgentCore analysis
+            click.echo(f"   Skill Level: {project.get('skill_level', 'N/A')}")
+
+            if project.get("patterns"):
+                patterns_str = ", ".join(project["patterns"][:2])
+                if len(project["patterns"]) > 2:
+                    patterns_str += f", +{len(project['patterns']) - 2} more"
+                click.echo(f"   Patterns: {patterns_str}")
+
+            if project.get("recommendations"):
+                rec = project["recommendations"][0]
+                click.echo(f"   Next: {rec.get('title', 'Continue building')}")
 
         click.echo()
         click.echo("=" * 60)
