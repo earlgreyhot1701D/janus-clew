@@ -52,8 +52,8 @@ logger = get_logger(__name__)
 
 app = FastAPI(
     title="Janus Clew",
-    description="Evidence-backed growth tracking with Amazon Q",
-    version="0.2.0",
+    description="Evidence-backed growth tracking with AWS AgentCore",
+    version="0.3.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
