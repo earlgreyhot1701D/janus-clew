@@ -185,6 +185,10 @@ export default function ExportCard({ analysis }: ExportCardProps) {
             <p class="subtitle">Tracked with Janus Clew - Evidence-Backed Growth Tracking</p>
         </header>
 
+        <div style="background: #dbeafe; border-left: 4px solid #0284c7; padding: 15px; margin: 20px 0; border-radius: 4px; font-size: 0.9em; color: #0c4a6e;">
+            <strong>🔍 Methodology:</strong> Analyzes your repositories • Detects patterns • AWS AgentCore provides recommendations
+        </div>
+
         <div class="metrics">
             <div class="metric-card">
                 <div class="metric-value">${analysis.overall.avg_complexity.toFixed(1)}</div>
@@ -226,10 +230,10 @@ export default function ExportCard({ analysis }: ExportCardProps) {
             `).join('')}
         </div>
 
-        <!-- PHASE 2: Amazon Q Technologies -->
+        <!-- PHASE 2: Technologies Detected -->
         ${Object.keys(amazonQTechs).length > 0 ? `
         <div class="section">
-            <h2>⚡ Technologies Detected by Amazon Q</h2>
+            <h2>⚡ Technologies Detected in Your Code</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
                 ${Object.entries(amazonQTechs).map(([tech, count]: [string, number]) => `
                 <div style="background: #fef3c7; padding: 15px; border-radius: 8px; text-align: center;">
@@ -258,8 +262,6 @@ export default function ExportCard({ analysis }: ExportCardProps) {
                 </div>
                 <div>
                     <span class="confidence">${Math.round(p.confidence * 100)}% confidence</span>
-                    ${p.amazon_q_validated ? '<span class="amazon-q">✓ Q Confirmed</span>' : ''}
-                    ${p.amazon_q_detected ? '<span class="amazon-q">🔍 Q Detected</span>' : ''}
                 </div>
             </div>
             `).join('')}

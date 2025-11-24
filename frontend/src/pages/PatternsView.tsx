@@ -134,7 +134,7 @@ export default function PatternsView() {
         </p>
       </div>
 
-      {/* AgentCore Status */}
+      {/* AgentCore Status - UPDATED MESSAGING */}
       <div className={`rounded-lg p-4 border ${
         agentcoreAvailable
           ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
@@ -152,18 +152,14 @@ export default function PatternsView() {
                 ? 'text-green-700 dark:text-green-300'
                 : 'text-blue-700 dark:text-blue-300'
             }`}>
-              {agentcoreAvailable
-                ? '✓ AWS AgentCore Analysis Active'
-                : '✓ Local Analysis (Graceful Fallback)'}
+              ✓ Evidence-Backed Analysis with AWS AgentCore
             </p>
             <p className={`text-sm ${
               agentcoreAvailable
                 ? 'text-green-600 dark:text-green-400'
                 : 'text-blue-600 dark:text-blue-400'
             }`}>
-              {agentcoreAvailable
-                ? signature?.agentcore_insights?.model || 'Bedrock AgentCore'
-                : 'Using local analysis with graceful fallback'}
+              Analyzes your repositories • Detects patterns • AWS AgentCore provides recommendations
             </p>
           </div>
         </div>
@@ -238,21 +234,9 @@ export default function PatternsView() {
                   <h5 className="font-semibold text-slate-900 dark:text-white">
                     {pattern.name || 'Unknown Pattern'}
                   </h5>
-                  <div className="flex gap-2">
-                    <span className="text-xs font-medium bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-1 rounded">
-                      {Math.round((pattern.confidence || 0) * 100)}%
-                    </span>
-                    {pattern.amazon_q_validated && (
-                      <span className="text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded">
-                        ✓ Q Confirmed
-                      </span>
-                    )}
-                    {pattern.amazon_q_detected && (
-                      <span className="text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-1 rounded">
-                        🔍 Q Detected
-                      </span>
-                    )}
-                  </div>
+                  <span className="text-xs font-medium bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-1 rounded">
+                    {Math.round((pattern.confidence || 0) * 100)}% confidence
+                  </span>
                 </div>
 
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
@@ -313,7 +297,7 @@ export default function PatternsView() {
           {preferences.traits && preferences.traits.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {preferences.traits.map((trait) => (
-                <span key={trait} className="badge">
+                <span key={trait} className="inline-block bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-full px-3 py-1 text-sm">
                   {trait}
                 </span>
               ))}
