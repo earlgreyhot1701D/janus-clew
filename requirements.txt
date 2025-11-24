@@ -13,8 +13,8 @@ python-dotenv==1.0.1        # Load .env configuration files
 # ============================================================================
 # AWS SDK & AgentCore
 # ============================================================================
-boto3==1.35.77              # AWS SDK (updated for better Python 3.13 support)
-botocore==1.35.77           # AWS SDK core (matches boto3)
+boto3==1.40.52              # AWS SDK (minimum required by bedrock-agentcore 1.0.6)
+botocore==1.40.52           # AWS SDK core (matches boto3)
 bedrock-agentcore==1.0.6    # AWS Bedrock AgentCore SDK (confirmed working)
 
 # ============================================================================
@@ -72,8 +72,9 @@ websockets==14.2            # WebSocket support (uvicorn[standard])
 # Notes:
 # - All versions tested with Python 3.13.1 on Windows
 # - bedrock-agentcore 1.0.6 confirmed working by user
+# - bedrock-agentcore 1.0.6 requires boto3>=1.40.52 (updated Nov 2024)
 # - pydantic 2.10.4 is compatible (user confirmed 2.8.0+ works)
-# - boto3 1.35.77 provides better Python 3.13 support than 1.28.85
+# - boto3 1.40.52 minimum required for bedrock-agentcore compatibility
 # - GitPython 3.1.43 (note capitalization) for Python 3.13 compatibility
 # - uvicorn[standard] includes httptools, websockets, watchfiles
 # - uvloop removed for Windows compatibility (Unix-only package)
