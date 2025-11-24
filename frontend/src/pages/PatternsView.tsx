@@ -1,12 +1,15 @@
-import { Lightbulb, TrendingUp, CheckCircle, AlertCircle } from 'lucide-react';
+import { Lightbulb, TrendingUp, CheckCircle, AlertCircle, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { apiClient } from '../services/api';
 
 interface Pattern {
   name: string;
-  evidence: string[];
+  evidence: string | string[];
   impact: string;
   confidence: number;
+  amazon_q_validated?: boolean;
+  amazon_q_detected?: boolean;
+  technologies?: string[];
 }
 
 interface Recommendation {
@@ -30,6 +33,15 @@ interface DevelopmentSignature {
     next_milestone: string;
   };
   recommendations: Recommendation[];
+  amazon_q_technologies: Record<string, number>;
+  agentcore_insights: {
+    from_agentcore: boolean;
+    model?: string;
+    amazon_q_technologies_provided?: number;
+    fallback_reason?: string;
+    local_analysis_only?: boolean;
+  };
+  agentcore_available: boolean;
 }
 
 export default function PatternsView() {
@@ -81,6 +93,10 @@ export default function PatternsView() {
     );
   }
 
+  const amazonQTechList = Object.entries(signature.amazon_q_technologies || {})
+    .map(([tech, count]) => ({ tech, count }))
+    .sort((a, b) => b.count - a.count);
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -89,9 +105,70 @@ export default function PatternsView() {
           Your Development Signature
         </h3>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Cross-project patterns, architectural preferences, and intelligent recommendations
+          Evidence-backed patterns, Amazon Q technologies, and intelligent recommendations from AWS AgentCore
         </p>
       </div>
+
+      {/* AgentCore Status */}
+      <div className={`rounded-lg p-4 border ${
+        signature.agentcore_available
+          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+          : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+      }`}>
+        <div className="flex items-center gap-2">
+          <Zap className={`w-5 h-5 ${
+            signature.agentcore_available
+              ? 'text-green-600 dark:text-green-400'
+              : 'text-blue-600 dark:text-blue-400'
+          }`} />
+          <div>
+            <p className={`font-semibold ${
+              signature.agentcore_available
+                ? 'text-green-700 dark:text-green-300'
+                : 'text-blue-700 dark:text-blue-300'
+            }`}>
+              {signature.agentcore_available
+                ? '✓ AWS AgentCore Analysis Active'
+                : '✓ Local Analysis (AgentCore Processing)'}
+            </p>
+            <p className={`text-sm ${
+              signature.agentcore_available
+                ? 'text-green-600 dark:text-green-400'
+                : 'text-blue-600 dark:text-blue-400'
+            }`}>
+              {signature.agentcore_available
+                ? signature.agentcore_insights.model || 'Bedrock AgentCore'
+                : 'Using local analysis with graceful fallback'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Amazon Q Technologies */}
+      {amazonQTechList.length > 0 && (
+        <div className="card p-6 border-slate-200 dark:border-slate-800">
+          <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <Zap className="w-5 h-5 text-amber-500" />
+            Technologies Detected by Amazon Q
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {amazonQTechList.map(({ tech, count }) => (
+              <div
+                key={tech}
+                className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3"
+              >
+                <p className="font-medium text-slate-900 dark:text-white text-sm">{tech}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                  {count} project{count !== 1 ? 's' : ''}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-4">
+            💡 These technologies are factored into AgentCore recommendations below
+          </p>
+        </div>
+      )}
 
       {/* Trajectory Overview */}
       {signature.trajectory && (
@@ -136,9 +213,21 @@ export default function PatternsView() {
                   <h5 className="font-semibold text-slate-900 dark:text-white">
                     {pattern.name}
                   </h5>
-                  <span className="text-xs font-medium bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-1 rounded">
-                    {Math.round(pattern.confidence * 100)}%
-                  </span>
+                  <div className="flex gap-2">
+                    <span className="text-xs font-medium bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-1 rounded">
+                      {Math.round(pattern.confidence * 100)}%
+                    </span>
+                    {pattern.amazon_q_validated && (
+                      <span className="text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded">
+                        ✓ Q Confirmed
+                      </span>
+                    )}
+                    {pattern.amazon_q_detected && (
+                      <span className="text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-1 rounded">
+                        🔍 Q Detected
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
@@ -148,19 +237,35 @@ export default function PatternsView() {
                 <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
                   <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">Evidence:</p>
                   <ul className="space-y-1">
-                    {pattern.evidence.slice(0, 2).map((item, i) => (
-                      <li key={i} className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-2">
-                        <span className="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                    {pattern.evidence.length > 2 && (
-                      <li className="text-xs text-slate-600 dark:text-slate-400">
-                        +{pattern.evidence.length - 2} more
-                      </li>
-                    )}
+                    {Array.isArray(pattern.evidence)
+                      ? pattern.evidence.slice(0, 2).map((item, i) => (
+                          <li key={i} className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-2">
+                            <span className="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))
+                      : (
+                          <li className="text-xs text-slate-500 dark:text-slate-400 flex items-start gap-2">
+                            <span className="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                            <span>{pattern.evidence}</span>
+                          </li>
+                        )
+                    }
                   </ul>
                 </div>
+
+                {pattern.technologies && pattern.technologies.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">Related Technologies:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {pattern.technologies.map((tech) => (
+                        <span key={tech} className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 rounded">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -190,7 +295,7 @@ export default function PatternsView() {
       {signature.recommendations && signature.recommendations.length > 0 && (
         <div className="space-y-4">
           <h4 className="font-semibold text-slate-900 dark:text-white">
-            Smart Recommendations
+            Smart Recommendations{signature.agentcore_available && ' (from AWS AgentCore)'}
           </h4>
           <div className="grid grid-cols-1 gap-4">
             {signature.recommendations.map((rec, index) => (

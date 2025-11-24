@@ -5,8 +5,7 @@ Manages prompts, responses, and error handling.
 """
 
 import json
-import yaml
-from pathlib import Path
+import logging
 from typing import Dict, List, Any, Optional
 from logger import get_logger
 from exceptions import JanusException
@@ -26,110 +25,64 @@ class AgentCoreCaller:
         """Initialize AgentCore caller.
 
         Args:
-            client: Optional AgentCore client (for testing)
+            client: Optional AgentCore client (for testing/mocking)
         """
         self.client = client or self._get_agentcore_client()
+        logger.debug(f"AgentCoreCaller initialized with client type: {type(self.client).__name__}")
 
     def _get_agentcore_client(self):
-        """Get AgentCore client - uses deployed agent via Bedrock AgentCore Runtime."""
+        """Get AgentCore client - uses deployed agent via agentcore CLI or mock.
+
+        Tries to use the actual deployed agent first, falls back to mock if unavailable.
+        """
         try:
-            import boto3
+            # Try to import and use the agentcore SDK
+            from agentcore import Client as AgentCoreClient
 
-            # Load agent ARN from config
-            config_path = Path(__file__).parent.parent.parent / '.bedrock_agentcore.yaml'
-            if not config_path.exists():
-                logger.warning(f"AgentCore config not found at {config_path}, using mock")
-                return MockAgentCoreClient()
+            logger.info("Initializing real AgentCore Runtime client")
+            # The agentcore SDK will use the configured agent from ~/.agentcore
+            client = RealAgentCoreClient()
+            logger.info("Real AgentCore client initialized successfully")
+            return client
 
-            with open(config_path, 'r') as f:
-                config = yaml.safe_load(f)
-
-            agent_arn = config.get('agents', {}).get('backend_agent', {}).get('bedrock_agentcore', {}).get('agent_arn')
-
-            if not agent_arn:
-                logger.warning("Agent ARN not found in config (not deployed yet), using mock")
-                return MockAgentCoreClient()
-
-            # Create bedrock-agentcore-runtime client
-            client = boto3.client('bedrock-agentcore-runtime', region_name='us-east-1')
-            logger.info(f"Initialized AgentCore Runtime client with agent: {agent_arn}")
-            return RealAgentCoreClient(client, agent_arn)
-
+        except ImportError:
+            logger.warning("agentcore SDK not available, using mock client")
+            return MockAgentCoreClient()
         except Exception as e:
-            logger.warning(f"AgentCore client init failed: {e}, using mock")
+            logger.warning(f"Failed to initialize real AgentCore client: {e}, using mock")
             return MockAgentCoreClient()
 
-    def detect_patterns(self, analyses: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Call AgentCore to detect patterns.
+    def detect_patterns(self, projects: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Call AgentCore to detect patterns and generate recommendations.
 
         Args:
-            analyses: List of analysis dictionaries
+            projects: List of project dictionaries
 
         Returns:
-            Pattern detection results with patterns array
+            Pattern detection results with patterns array and recommendations
 
         Raises:
             AgentCoreIntegrationError: If call fails
         """
         try:
-            # Build payload for agent
-            projects = []
-            for analysis in analyses:
-                project_data = {
-                    'name': analysis.get('project_name', 'unknown'),
-                    'complexity_score': analysis.get('complexity_score', 0.0),
-                    'skills': analysis.get('detected_skills', []),
-                    'timestamp': analysis.get('timestamp', 0),
-                }
-                projects.append(project_data)
+            logger.debug(f"Calling AgentCore to detect patterns for {len(projects)} projects")
 
             payload = {
-                "prompt": "Detect development patterns across these projects",
+                "prompt": "Detect development patterns across these projects and provide career guidance",
                 "projects": projects
             }
 
-            # Call AgentCore
+            # Call AgentCore (real or mock)
             response = self.client.analyze(payload)
-            logger.debug("Received AgentCore pattern detection response")
+            logger.debug("Received AgentCore response")
 
-            # Parse response
+            # Parse and validate response
             result = self._parse_response(response)
             return result
 
         except Exception as e:
-            logger.error(f"AgentCore pattern detection failed: {e}")
+            logger.error(f"AgentCore pattern detection failed: {e}", exc_info=True)
             raise AgentCoreIntegrationError(f"Pattern detection failed: {e}")
-
-    def analyze_preferences(self, analyses: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Call AgentCore to analyze preferences.
-
-        Args:
-            analyses: List of analyses
-
-        Returns:
-            Preference analysis results (currently returns patterns as preferences)
-        """
-        try:
-            # For now, use pattern detection as preferences
-            # The agent returns patterns which can be interpreted as preferences
-            result = self.detect_patterns(analyses)
-
-            # Transform patterns into preference format
-            preferences = []
-            for pattern in result.get('patterns', []):
-                preference = {
-                    'name': pattern['name'],
-                    'score': pattern.get('confidence', 0.5),
-                    'reasoning': pattern.get('impact', ''),
-                    'evidence': pattern.get('evidence', '')
-                }
-                preferences.append(preference)
-
-            return {'preferences': preferences}
-
-        except Exception as e:
-            logger.error(f"AgentCore preference analysis failed: {e}")
-            raise AgentCoreIntegrationError(f"Preference analysis failed: {e}")
 
     def _parse_response(self, response: Any) -> Dict[str, Any]:
         """Parse response from AgentCore.
@@ -162,17 +115,29 @@ class AgentCoreCaller:
 
 
 class RealAgentCoreClient:
-    """Real AgentCore client using deployed agent via Bedrock AgentCore Runtime."""
+    """Real AgentCore client using deployed agent via agentcore CLI."""
 
-    def __init__(self, bedrock_client, agent_arn: str):
-        """Initialize with Bedrock AgentCore Runtime client and agent ARN.
+    def __init__(self):
+        """Initialize with deployed AgentCore agent."""
+        try:
+            import subprocess
+            import json
 
-        Args:
-            bedrock_client: boto3 bedrock-agentcore-runtime client
-            agent_arn: ARN of deployed AgentCore agent
-        """
-        self.client = bedrock_client
-        self.agent_arn = agent_arn
+            # Get agent status to verify it's running
+            result = subprocess.run(
+                ["agentcore", "status"],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+
+            if result.returncode == 0:
+                logger.info("AgentCore agent is ready")
+            else:
+                logger.warning(f"AgentCore status check returned: {result.stderr}")
+
+        except Exception as e:
+            logger.warning(f"Could not verify AgentCore status: {e}")
 
     def analyze(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Call deployed AgentCore agent for analysis.
@@ -182,36 +147,58 @@ class RealAgentCoreClient:
 
         Returns:
             Response from agent
+
+        Raises:
+            Exception: If invocation fails
         """
         try:
-            logger.info(f"Invoking AgentCore agent: {self.agent_arn}")
+            import subprocess
+            import json
 
-            # Invoke agent via AgentCore Runtime API
-            response = self.client.invoke_agent(
-                agentArn=self.agent_arn,
-                sessionId=f"session-{hash(str(payload)) % 100000}",  # Simple session ID
-                input=json.dumps(payload)
+            logger.info("Invoking AgentCore agent via CLI")
+
+            # Invoke agent via agentcore CLI
+            payload_json = json.dumps(payload)
+            result = subprocess.run(
+                ["agentcore", "invoke", payload_json],
+                capture_output=True,
+                text=True,
+                timeout=30
             )
 
-            # Parse response
-            if 'output' in response:
-                output = response['output']
-                if isinstance(output, str):
-                    return json.loads(output)
-                return output
-            elif 'body' in response:
-                # Handle streaming response
-                body = response['body'].read()
-                return json.loads(body)
-            else:
-                logger.error(f"Unexpected response format: {response}")
-                raise AgentCoreIntegrationError("Unexpected response format from agent")
+            if result.returncode != 0:
+                logger.error(f"AgentCore invocation failed: {result.stderr}")
+                raise Exception(f"AgentCore CLI returned error: {result.stderr}")
+
+            # Parse output - agentcore CLI returns JSON in Response: field
+            output = result.stdout
+
+            # Extract JSON from output (it's usually in "Response:" section)
+            if "Response:" in output:
+                json_start = output.find("{")
+                if json_start != -1:
+                    json_str = output[json_start:]
+                    # Find the matching closing brace
+                    brace_count = 0
+                    for i, char in enumerate(json_str):
+                        if char == "{":
+                            brace_count += 1
+                        elif char == "}":
+                            brace_count -= 1
+                            if brace_count == 0:
+                                json_str = json_str[:i+1]
+                                break
+                    response = json.loads(json_str)
+                    logger.debug(f"Parsed AgentCore response: {response}")
+                    return response
+
+            # If we can't parse, return the raw output as fallback
+            logger.warning("Could not parse structured response, returning raw output")
+            return {"status": "success", "raw_output": output}
 
         except Exception as e:
-            logger.error(f"AgentCore Runtime API call failed: {e}", exc_info=True)
-            # Gracefully fallback to mock
-            logger.warning("Falling back to mock client")
-            return MockAgentCoreClient().analyze(payload)
+            logger.error(f"AgentCore Runtime CLI call failed: {e}", exc_info=True)
+            raise
 
 
 class MockAgentCoreClient:
@@ -221,70 +208,161 @@ class MockAgentCoreClient:
         """Mock analysis response based on payload.
 
         Args:
-            payload: Payload dict with prompt and projects
+            payload: Payload dict with prompt, projects, amazon_q_technologies, etc.
 
         Returns:
-            Mock response with patterns and recommendations
+            Mock response with patterns and recommendations that reference Amazon Q data
         """
         logger.debug("Using mock AgentCore client")
 
-        projects = payload.get('projects', [])
-        prompt = payload.get('prompt', '')
+        projects = payload.get("projects", [])
+        amazon_q_technologies = payload.get("amazon_q_technologies", {})
+        detected_patterns = payload.get("detected_patterns", [])
+        prompt = payload.get("prompt", "")
 
-        # Generate basic patterns based on project data
-        patterns = []
+        logger.debug(f"Mock analysis: {len(projects)} projects, {len(amazon_q_technologies)} AWS Q techs")
 
-        if projects:
-            # Check database usage
-            db_count = sum(1 for p in projects if any(
-                s.lower() in ['sql', 'database', 'postgres', 'mongodb']
-                for s in p.get('skills', [])
-            ))
-            if db_count < len(projects) * 0.3:
-                patterns.append({
-                    "name": "State Simplicity Preference",
-                    "evidence": f"{db_count}/{len(projects)} projects use databases",
-                    "confidence": 0.90,
-                    "impact": "Prefers simple state management"
-                })
+        # Generate patterns (use provided ones or generate)
+        patterns = detected_patterns if detected_patterns else self._generate_patterns(projects)
 
-            # Check async usage
-            async_count = sum(1 for p in projects if any(
-                s.lower() in ['async', 'asyncio', 'threading']
-                for s in p.get('skills', [])
-            ))
-            if async_count >= len(projects) * 0.5:
-                patterns.append({
-                    "name": "Async-First Development",
-                    "evidence": f"{async_count}/{len(projects)} projects use async",
-                    "confidence": 0.85,
-                    "impact": "Builds with concurrency from day 1"
-                })
+        # Generate recommendations that reference Amazon Q technologies
+        recommendations = self._generate_recommendations(
+            patterns,
+            amazon_q_technologies,
+            projects
+        )
 
-            # Check complexity trajectory
-            avg_complexity = sum(p.get('complexity_score', 0) for p in projects) / len(projects)
-            if avg_complexity > 7.0:
-                patterns.append({
-                    "name": "High Complexity Tolerance",
-                    "evidence": f"Average complexity: {avg_complexity:.1f}/10",
-                    "confidence": 0.88,
-                    "impact": "Comfortable with sophisticated architectures"
-                })
-
-        # Generate recommendations
-        recommendations = [
-            "Continue leveraging async patterns for scalability",
-            "Explore advanced AWS services to expand your cloud toolkit",
-            "Consider contributing to open source projects"
-        ]
-
-        return {
+        result = {
             "status": "success",
             "projects_analyzed": len(projects),
             "patterns": patterns,
             "recommendations": recommendations,
             "metrics": {
-                "average_complexity": sum(p.get('complexity_score', 0) for p in projects) / max(len(projects), 1) if projects else 0,
-                "pattern_count": len(patterns)
+                "average_complexity": sum(p.get("complexity_score", 0) for p in projects) / max(len(projects), 1) if projects else 0,
+                "pattern_count": len(patterns),
+                "amazon_q_technologies_used": len(amazon_q_technologies),
             }
         }
+
+        logger.debug(f"Mock response: {len(patterns)} patterns, {len(recommendations)} recommendations")
+        return result
+
+    def _generate_patterns(self, projects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Generate basic patterns based on project data.
+
+        Args:
+            projects: List of projects
+
+        Returns:
+            List of detected patterns
+        """
+        patterns = []
+
+        if not projects:
+            return patterns
+
+        # Pattern 1: Check database usage
+        db_count = sum(1 for p in projects if any(
+            s.lower() in ['sql', 'database', 'postgres', 'mongodb']
+            for s in p.get('skills', [])
+        ))
+        if db_count < len(projects) * 0.3:
+            patterns.append({
+                "name": "State Simplicity Preference",
+                "evidence": [f"{db_count}/{len(projects)} projects use databases"],
+                "confidence": 0.90,
+                "impact": "Prefers simple state management"
+            })
+
+        # Pattern 2: Check async usage
+        async_count = sum(1 for p in projects if any(
+            s.lower() in ['async', 'asyncio', 'threading', 'concurrency']
+            for s in p.get('skills', [])
+        ))
+        if async_count >= len(projects) * 0.5:
+            patterns.append({
+                "name": "Async-First Development",
+                "evidence": [f"{async_count}/{len(projects)} projects use async"],
+                "confidence": 0.85,
+                "impact": "Builds with concurrency from day 1"
+            })
+
+        # Pattern 3: Check complexity trajectory
+        avg_complexity = sum(p.get('complexity_score', 0) for p in projects) / len(projects) if projects else 0
+        if avg_complexity > 7.0:
+            patterns.append({
+                "name": "High Complexity Tolerance",
+                "evidence": [f"Average complexity: {avg_complexity:.1f}/10"],
+                "confidence": 0.88,
+                "impact": "Comfortable with sophisticated architectures"
+            })
+
+        return patterns
+
+    def _generate_recommendations(
+        self,
+        patterns: List[Dict[str, Any]],
+        amazon_q_technologies: Dict[str, int],
+        projects: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Generate recommendations that reference Amazon Q technologies.
+
+        Args:
+            patterns: Detected patterns
+            amazon_q_technologies: Technologies from Amazon Q
+            projects: List of projects
+
+        Returns:
+            List of recommendations
+        """
+        recommendations = []
+        pattern_names = {p['name'] for p in patterns}
+
+        # Build recommendations that reference Amazon Q technologies
+
+        if "Async-First Development" in pattern_names:
+            # Check if they use AWS from Amazon Q
+            aws_usage = amazon_q_technologies.get("AWS", 0) + amazon_q_technologies.get("AWS Bedrock", 0)
+            if aws_usage > 0:
+                recommendations.append({
+                    "title": "Ready for Event-Driven Architecture",
+                    "description": "Your async-first approach combined with AWS usage makes you ready for event-driven systems.",
+                    "status": "ready",
+                    "why": f"You use async patterns (confirmed by analysis) + AWS technologies (detected by Amazon Q in {aws_usage} projects)",
+                    "timeline": "Now",
+                    "technologies": ["AWS EventBridge", "SQS", "SNS"]
+                })
+
+        if "State Simplicity Preference" in pattern_names:
+            recommendations.append({
+                "title": "SQLite → PostgreSQL Path",
+                "description": "When you need persistence, start with SQLite for simplicity, then graduate to PostgreSQL.",
+                "status": "ready",
+                "why": "Your stateless preference shows you prioritize simplicity. SQLite matches this philosophy before moving to PostgreSQL.",
+                "timeline": "2-3 weeks",
+                "technologies": ["SQLite", "asyncpg", "PostgreSQL"]
+            })
+
+        # Check AWS usage from Amazon Q for general recommendations
+        if amazon_q_technologies.get("AWS Bedrock", 0) > 0:
+            recommendations.append({
+                "title": "Explore Advanced AWS Services",
+                "description": "You're already using AWS Bedrock. Expand to Step Functions, AppSync, or EventBridge.",
+                "status": "explore",
+                "why": "Amazon Q detected Bedrock usage. You're ready for more sophisticated AWS patterns.",
+                "timeline": "3-4 weeks",
+                "technologies": ["Step Functions", "AppSync", "EventBridge"]
+            })
+
+        # Default recommendations if nothing else
+        if not recommendations:
+            recommendations.append({
+                "title": "Keep Building",
+                "description": "Continue shipping projects that push you slightly outside your comfort zone.",
+                "status": "explore",
+                "why": "Consistent building is the fastest way to grow.",
+                "timeline": "Ongoing",
+                "technologies": []
+            })
+
+        return recommendations

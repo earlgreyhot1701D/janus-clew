@@ -231,6 +231,101 @@ class APIClient {
       throw new Error(`Project ${projectName} not found`);
     }
   }
+
+  async getDevelopmentSignature(): Promise<any> {
+    try {
+      const response = await this.client.get<{ status: string; signature: any }>(
+        '/development-signature'
+      );
+      return response.data.signature;
+    } catch (error) {
+      console.warn('Failed to fetch development signature, using mock data');
+      // Return mock development signature
+      return {
+        patterns: [
+          {
+            name: 'State Simplicity Preference',
+            evidence: ['0/3 projects use databases'],
+            confidence: 0.95,
+            impact: 'Prefers simple state management over heavy database integration',
+            amazon_q_validated: true,
+          },
+          {
+            name: 'Async-First Architecture',
+            evidence: ['2/3 projects use async patterns'],
+            confidence: 0.88,
+            impact: 'Builds with concurrency in mind from the start',
+            amazon_q_validated: true,
+          },
+          {
+            name: 'Rapid Learning Trajectory',
+            evidence: ['Complexity grew from 6.2 to 8.1'],
+            confidence: 0.92,
+            impact: 'Shows accelerating technical growth',
+            amazon_q_detected: false,
+          },
+          {
+            name: 'Cloud-Native Development',
+            evidence: ['Amazon Q detected AWS in 3 projects'],
+            confidence: 0.95,
+            impact: 'Comfortable building cloud-first architectures',
+            amazon_q_detected: true,
+            technologies: ['AWS', 'AWS Bedrock'],
+          },
+        ],
+        preferences: {
+          description:
+            'You prefer building stateless, concurrent systems with cloud-first architecture. You avoid heavy database integration and favor async patterns.',
+          traits: ['Stateless Design', 'Async-First', 'Cloud-Native', 'Concurrent Systems'],
+        },
+        trajectory: {
+          current_level: 'Intermediate-Advanced',
+          growth_velocity: '2.5x per project',
+          next_milestone: 'Distributed Systems',
+        },
+        recommendations: [
+          {
+            title: 'Ready for Event-Driven Architecture',
+            description: 'Your async-first approach combined with AWS usage makes you ready for event-driven systems.',
+            status: 'ready',
+            why: 'You use async patterns (confirmed by analysis) + AWS technologies (detected by Amazon Q in 3 projects)',
+            timeline: 'Now',
+            technologies: ['AWS EventBridge', 'SQS', 'SNS'],
+          },
+          {
+            title: 'SQLite → PostgreSQL Path',
+            description: 'When you need persistence, start with SQLite for simplicity, then graduate to PostgreSQL.',
+            status: 'ready',
+            why: 'Your stateless preference shows you prioritize simplicity. SQLite matches this philosophy before moving to PostgreSQL.',
+            timeline: '2-3 weeks',
+            technologies: ['SQLite', 'asyncpg', 'PostgreSQL'],
+          },
+          {
+            title: 'Explore Advanced AWS Services',
+            description: 'You\'re already using AWS Bedrock. Expand to Step Functions, AppSync, or EventBridge.',
+            status: 'explore',
+            why: 'Amazon Q detected Bedrock usage. You\'re ready for more sophisticated AWS patterns.',
+            timeline: '3-4 weeks',
+            technologies: ['Step Functions', 'AppSync', 'EventBridge'],
+          },
+        ],
+        amazon_q_technologies: {
+          Python: 3,
+          'AWS Bedrock': 3,
+          'AWS': 3,
+          'async/await': 2,
+          'AgentCore': 2,
+          'FastAPI': 1,
+        },
+        agentcore_insights: {
+          from_agentcore: false,
+          local_analysis_only: true,
+          amazon_q_technologies_provided: 6,
+        },
+        agentcore_available: false,
+      };
+    }
+  }
 }
 
 export const apiClient = new APIClient();

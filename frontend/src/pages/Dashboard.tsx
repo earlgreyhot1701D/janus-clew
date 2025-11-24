@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, Zap } from 'lucide-react';
 import Timeline from '../components/Timeline';
 import SkillsView from '../components/SkillsView';
+import PatternsView from './PatternsView';
 import GrowthMetrics from '../components/GrowthMetrics';
 import ExportCard from '../components/ExportCard';
 import { apiClient, type AnalysisData } from '../services/api';
 
-type TabType = 'timeline' | 'skills' | 'export';
+type TabType = 'timeline' | 'skills' | 'patterns' | 'export';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('timeline');
@@ -120,17 +121,22 @@ export default function Dashboard() {
       {/* Tabs */}
       <div className="border-b border-slate-200 dark:border-slate-800">
         <div className="flex gap-8">
-          {['timeline', 'skills', 'export'].map((tab) => (
+          {['timeline', 'skills', 'patterns', 'export'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as TabType)}
-              className={`py-4 px-2 font-medium border-b-2 transition-colors capitalize ${
+              className={`py-4 px-2 font-medium border-b-2 transition-colors capitalize flex items-center gap-2 ${
                 activeTab === tab
                   ? 'border-teal-500 text-teal-600 dark:text-teal-400'
                   : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
               {tab}
+              {tab === 'patterns' && (
+                <span className="text-xs bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded-full font-bold">
+                  NEW
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -140,6 +146,7 @@ export default function Dashboard() {
       <div>
         {activeTab === 'timeline' && <Timeline projects={analysis.projects} />}
         {activeTab === 'skills' && <SkillsView projects={analysis.projects} />}
+        {activeTab === 'patterns' && <PatternsView />}
         {activeTab === 'export' && <ExportCard analysis={analysis} />}
       </div>
 
