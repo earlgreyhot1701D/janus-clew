@@ -30,7 +30,7 @@ agents:
     bedrock_agentcore:
       agent_id: backend_agent-43SvMM2HlC
       agent_arn: arn:aws:bedrock-agentcore:us-east-1:833162255362:runtime/backend_agent-43SvMM2HlC
-      agent_session_id: 3fe93809-1416-4b4a-b9f4-7a222d32eed1
+      agent_session_id: null
     codebuild:
       project_name: bedrock-agentcore-backend_agent-builder
       execution_role: arn:aws:iam::833162255362:role/AmazonBedrockAgentCoreSDKCodeBuild-us-east-1-59a3b76927
@@ -49,3 +49,6 @@ agents:
     authorizer_configuration: null
     request_header_configuration: null
     oauth_configuration: null
+    api_key_env_var_name: null
+    api_key_credential_provider_name: null
+    is_generated_by_agentcore_create: false
