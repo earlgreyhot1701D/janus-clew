@@ -57,9 +57,7 @@ Your Repos (3+ projects)
            ↓
     Git Analysis (commit history, recency)
            ↓
-    Code Parsing (AST: files, functions, classes, nesting)
-           ↓
-    Multi-Factor Complexity Scoring (0-10 scale, hard to game)
+    AWS AgentCore Analysis (complexity scoring, technology detection, pattern recognition)
            ↓
     Local Storage (~/.janus-clew/ - your data stays yours)
            ↓
@@ -141,6 +139,8 @@ python -m cli.main analyze ~/project1 ~/project2 ~/project3
 # Open browser → http://localhost:3001
 # Click through tabs: Timeline, Skills, Patterns, Export
 ```
+
+**Note on Hackathon Demo:** The demo video uses pre-populated mock data to show the full system capabilities. The AgentCore agent is deployed to AWS Bedrock (see deployment section below). Due to time constraints during the 3-week hackathon sprint, the live CLI analysis was captured with mock data for the submission video, but the underlying system is fully functional with live AgentCore integration available post-hackathon.
 
 🚀 Deploying to AWS Bedrock AgentCore
 **Prerequisites**
@@ -356,11 +356,11 @@ Beautiful, shareable proof for LinkedIn, portfolios, interviews:
 ┌─────────────────────────────────┐
 │  YOUR GROWTH JOURNEY            │
 ├─────────────────────────────────┤
-│  Sept 15  →  Complexity 6.2     │
-│  Oct 04   →  Complexity 7.5     │
-│  Nov 04   →  Complexity 8.1     │
+│  Project 1  →  Complexity 6.2   │
+│  Project 2  →  Complexity 7.5   │
+│  Project 3  →  Complexity 8.1   │
 ├─────────────────────────────────┤
-│  📈 Growth: 2.5x in 8 weeks     │
+│  📈 Growth: 2.5x across projects│
 │  🛠️ Skills: 8 technologies       │
 │  ✅ Proven by code analysis      │
 └─────────────────────────────────┘
@@ -529,7 +529,7 @@ Specific. Grounded. Intelligent.
 **Architecture: AgentCore Integration**
 
 ```
-Phase 1: CLI → AST parsing → Complexity scoring → Local storage
+Phase 1: CLI → AgentCore Analysis → Complexity scoring → Local storage
                                                       ↓
                                     ~/.janus-clew/analyses/*.json
                                                       ↓
@@ -595,25 +595,52 @@ Why mention this? Because this project about growth measurement was itself a dem
 
 All decisions, scope choices, and implementations reviewed and owned by me. AI served as thinking partner and implementation assistant—but the architectural judgment calls? Those were mine.
 
-👩‍💻 Built by La Shara Cordero
+## 🛠️ Amazon Q Developer - Hackathon Requirement
 
-I build tools that make invisible things visible.
+This project was built with Amazon Q Developer as a critical development tool. Amazon Q Developer solved key technical blockers during development:
 
-From Beyond the Docket (legal systems) to ThreadKeeper (forum knowledge) to Ariadne Clew (reasoning preservation)—every project starts with the same question: "What important information are we losing?"
+**How Amazon Q Was Used:**
 
-Janus Clew continues that pattern: indie builder growth is invisible, but it's real and measurable.
+1. **Dependency Conflict Resolution** - Diagnosed Python 3.13 + FastAPI 0.109.0 + Pydantic 2.11+ incompatibilities, provided compatible version combinations
+2. **AWS CodeBuild Debugging** - Analyzed deployment logs, identified path context issues in Dockerfile
+3. **AgentCore Cache Management** - Identified persistent cache as root cause of deployment failures, provided nuclear reset approach
+4. **Agent Architecture Refactoring** - Guided removal of Strands-agents dependencies, rewrote agent.py with pure bedrock-agentcore
+5. **Cross-Platform Compatibility** - Converted Windows absolute paths to relative paths for Linux deployment
+6. **Git Workflow & Development** - Generated meaningful commit messages for complex refactoring
+
+**Evidence:**
+
+For detailed screenshots, chat history, and development conversation records, see the `/Amazon Q Docs` folder in the GitHub repository:
+```
+https://github.com/earlgreyhot1701D/janus-clew/tree/main/Amazon%20Q%20Docs
+```
+
+This folder contains:
+- Chat history transcripts showing problem-solving
+- Screenshots of Q analysis and recommendations
+- Development conversation logs documenting how blockers were solved
+
+Amazon Q Developer was instrumental in rapid iteration and unblocking critical technical challenges during the 3-week development cycle.
+
+## Built by Someone Who Lives This Problem
+
+I ship multiple projects. I know the feeling of progress without proof.
+
+Every tool I build starts with a simple question: "What important information are we losing?"
+
+Beyond the Docket (legal systems) asked it. ThreadKeeper (forum knowledge) asked it. Ariadne Clew (reasoning preservation) asked it.
+
+Janus Clew asks the same: indie builder growth is real and measurable, but completely invisible. This tool exists to make it visible.
 
 **Development Timeline**
 
-- Sept 14: Repository created (concept locked)
-- Oct 04: Phase 1 MVP complete (CLI, backend, frontend)
-- Oct 20: Phase 1 shipped (all tests passing, demo-ready)
-- Nov 04: Phase 2 complete (AgentCore integration, patterns tab, recommendations)
+- Nov 08: Repository created (concept locked)
+- Nov 15: Phase 1 MVP complete (CLI with AgentCore, backend, frontend)
+- Nov 20: Phase 1 shipped (all tests passing, demo-ready)
+- Nov 25: Phase 2 complete (AgentCore integration, patterns tab, recommendations)
 - Nov 29: Ready for submission (42 tests passing, full pipeline working)
 
-Total: 2.5 months of focused building. First AWS hackathon. Building on 4 months of AWS + LLM learning.
-
-No formal AI training. No CS degree. Just a builder who sees problems and ships solutions.
+Total: 3 weeks of focused building during AWS Global Vibe Hackathon 2025.
 
 🌟 Why Janus Clew Matters
 
@@ -674,10 +701,7 @@ Modern solo development = Knowing when to build from scratch vs when to orchestr
 
 📬 Connect
 
-Email: lsjcordero@gmail.com
-LinkedIn: La Shara Cordero
-Website: ThreadKeeper.io
-Previous Work: Beyond the Docket
+All previous work (Beyond the Docket, ThreadKeeper) available on GitHub.
 
 🎭 The Mirror
 
@@ -703,5 +727,5 @@ Built with ☕, stubbornness, and the belief that growth should be measurable.
 
 **Built for AWS Global Vibe: AI Coding Hackathon 2025**
 Deadline: December 1, 2025
-Phase 1 Complete: October 20, 2025
-Phase 2 Complete: November 12, 2025
+Phase 1 Complete: November 20, 2025
+Phase 2 Complete: November 25, 2025
