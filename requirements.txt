@@ -1,7 +1,12 @@
 # ============================================================================
-# JANUS CLEW - Core Dependencies
-# Last known working: Nov 23, 2024
+# JANUS CLEW - Requirements (Based on Ariadne-Clew working config)
+# Updated: Nov 24, 2025
 # ============================================================================
+
+# Core AWS/AgentCore (matches Ariadne's requirements)
+boto3>=1.40.0
+bedrock-agentcore
+strands-agents
 
 # CLI Framework
 click==8.1.7
@@ -11,23 +16,32 @@ gitpython==3.1.40
 fastapi==0.109.0
 uvicorn==0.27.0
 
-# Data Validation
-pydantic==2.8.0
-typing-extensions==4.12.2
+# Data Validation (matches Ariadne: >=2.11.0)
+pydantic>=2.11.0
+typing-extensions>=4.13.2
 
 # File Operations
 aiofiles==23.2.1
 
-# Development Tools
-pytest==7.4.4
-pytest-asyncio==0.21.0
-pytest-cov==4.1.0
-black==24.1.0
-isort==5.13.2
+# Environment & Utilities
+python-dotenv>=1.0.1
+pytz==2024.2
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+
+# Code Quality
+black>=24.1.0
+isort>=5.13.2
+ruff>=0.13.0
+mypy>=1.18.0
 
 # ============================================================================
 # Notes:
-# - boto3 and bedrock-agentcore are NOT included here
-# - Install those separately if needed: pip install boto3 bedrock-agentcore
-# - This is the last known working configuration from Nov 23, 2024
+# - Uses flexible versions (>=) for boto3, bedrock-agentcore, strands-agents
+# - Pydantic >=2.11.0 matches bedrock-agentcore requirements
+# - Based on Ariadne-Clew's working configuration
+# - Should resolve all dependency conflicts
 # ============================================================================
